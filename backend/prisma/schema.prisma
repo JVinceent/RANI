@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  stellarPublicKey String?   @unique
+  passwordHash     String?
+  createdAt        DateTime  @default(now())
+
+  contacts         Contact[]
+  transactions     Transaction[]
+  spendingLimit    SpendingLimit?
+  auditLogs        AuditLog[]
+}
+
+// Mirrors AddContactModal's NewContactData { name, address, tag } exactly
+model Contact {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  address   String
+  tag       String?
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+
+  @@index([userId, name])
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id])
+  contactId     String?
+  contact       Contact?          @relation(fields: [contactId], references: [id])
+  amount        String
+  assetCode     String
+  assetIssuer   String?
+  memo          String?
+  status        String            @default("PENDING")
+  stellarTxHash String?
+  errorMessage  String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model SpendingLimit {
+  id           String @id @default(uuid())
+  userId       String @unique
+  user         User   @relation(fields: [userId], references: [id])
+  perTxLimit   Float  @default(5000)
+  dailyLimit   Float  @default(20000)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  payload   String
+  createdAt DateTime @default(now())
+}
