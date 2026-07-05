@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { prisma } from "../db";
+import { supabase } from "../db";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
 import { parseCommand } from "../lib/nlp";
 
@@ -21,10 +21,13 @@ parseRouter.post("/", async (req: AuthedRequest, res) => {
   }
 
   if (command.intent === "send_payment" && command.recipientName) {
-    const contacts = await prisma.contact.findMany({ where: { userId: req.userId! } });
-    const matches = contacts.filter((c: { name: string }) =>
-      c.name.toLowerCase().includes(command.recipientName!.toLowerCase())
-    );
+    const { data: matches, error } = await supabase
+      .from("contacts")
+      .select("*")
+      .eq("user_id", req.userId!)
+      .ilike("name", `%${command.recipientName}%`);
+
+    if (error) return res.status(500).json({ error: error.message });
 
     if (matches.length === 0) {
       return res.json({

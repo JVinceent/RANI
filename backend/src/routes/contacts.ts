@@ -1,14 +1,19 @@
 import { Router } from "express";
 import { z } from "zod";
-import { prisma } from "../db";
+import { supabase } from "../db";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
 
 export const contactsRouter = Router();
 contactsRouter.use(requireAuth);
 
 contactsRouter.get("/", async (req: AuthedRequest, res) => {
-  const contacts = await prisma.contact.findMany({ where: { userId: req.userId! } });
-  res.json(contacts);
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*")
+    .eq("user_id", req.userId!);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
 // Body shape matches AddContactModal's NewContactData { name, address, tag } exactly
@@ -22,14 +27,24 @@ contactsRouter.post("/", async (req: AuthedRequest, res) => {
   const parsed = newContactSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const contact = await prisma.contact.create({
-    data: { ...parsed.data, userId: req.userId! },
-  });
-  res.status(201).json(contact);
+  const { data, error } = await supabase
+    .from("contacts")
+    .insert({ ...parsed.data, user_id: req.userId! })
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json(data);
 });
 
 contactsRouter.delete("/:id", async (req: AuthedRequest, res) => {
-  await prisma.contact.deleteMany({ where: { id: req.params.id, userId: req.userId! } });
+  const { error } = await supabase
+    .from("contacts")
+    .delete()
+    .eq("id", req.params.id)
+    .eq("user_id", req.userId!);
+
+  if (error) return res.status(500).json({ error: error.message });
   res.status(204).send();
 });
 
@@ -40,7 +55,13 @@ contactsRouter.delete("/:id", async (req: AuthedRequest, res) => {
  */
 contactsRouter.get("/resolve", async (req: AuthedRequest, res) => {
   const name = String(req.query.name ?? "").toLowerCase();
-  const contacts = await prisma.contact.findMany({ where: { userId: req.userId! } });
-  const matches = contacts.filter((c: { name: string }) => c.name.toLowerCase().includes(name));
-  res.json({ matches, ambiguous: matches.length > 1 });
+
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*")
+    .eq("user_id", req.userId!)
+    .ilike("name", `%${name}%`); // case-insensitive partial match, done in the DB itself
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ matches: data, ambiguous: data.length > 1 });
 });
