@@ -18,9 +18,16 @@ Rani lets users send Stellar payments by typing plain sentences ("Send ₱500 to
 
 ## Project structure
 rani-app/
-├── frontend/   — React/Vite UI
-├── backend/    — Express API + Stellar integration
-└── package.json — run both together
+├── frontend/
+├── backend/
+│   ├── src/
+│   │   ├── lib/
+│   │   ├── routes/
+│   │   ├── middleware/auth.ts 
+│   │   ├── db.ts                 
+│   │   └── server.ts 
+│   └── supabase_schema.sql
+└── package.json
 
 ## Local development
 
