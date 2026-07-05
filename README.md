@@ -17,18 +17,33 @@ Rani lets users send Stellar payments by typing plain sentences ("Send ₱500 to
 - **Chain:** Stellar SDK, Horizon, testnet
 
 ## Project structure
+```
 rani-app/
 ├── frontend/
+│   └── src/
+│       ├── app/
+│       ├── hooks/
+│       │   └── useWallet.ts      — Freighter connect hook
+│       └── lib/
 ├── backend/
 │   ├── src/
 │   │   ├── lib/
+│   │   │   ├── stellar.ts        — SDK config, testnet, Friendbot
+│   │   │   ├── balances.ts       — XLM/USDC balance fetch
+│   │   │   ├── payment.ts        — build → submit → poll transaction
+│   │   │   ├── simulate.ts       — path-payment preview
+│   │   │   └── nlp.ts            — regex intent/entity parser
 │   │   ├── routes/
-│   │   ├── middleware/auth.ts 
-│   │   ├── db.ts                 
-│   │   └── server.ts 
-│   └── supabase_schema.sql
-└── package.json
-
+│   │   │   ├── auth.ts
+│   │   │   ├── contacts.ts
+│   │   │   ├── parse.ts
+│   │   │   └── transactions.ts
+│   │   ├── middleware/auth.ts    — JWT guard
+│   │   ├── db.ts                 — Supabase client
+│   │   └── server.ts             — Express entrypoint
+│   └── supabase_schema.sql       — DB schema, run in Supabase's SQL Editor
+└── package.json                  — run both together
+```
 ## Local development
 
 ```bash
