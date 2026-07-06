@@ -34,30 +34,35 @@ const CURRENCY_ALIASES: Record<string, string> = {
   usdc: "USDC",
   xlm: "XLM",
   lumens: "XLM",
+  usd: "USD",
+  dollar: "USD",
+  dollars: "USD",
 };
 
-// Matches "₱500", "500 pesos", "500php", "500 USDC", etc.
-const AMOUNT_RE = /(?:₱\s?(\d+(?:\.\d+)?))|(\d+(?:\.\d+)?)\s*(pesos?|php|usdc|xlm|lumens)?/i;
+const AMOUNT_RE = /(?:₱\s?(\d+(?:\.\d+)?))|(\d+(?:\.\d+)?)\s*(pesos?|php|usdc|xlm|lumens|usd|dollars?)?/i;
 
 // "to Maria", "kay Maria" (Taglish), "para kay Maria"
 const RECIPIENT_RE = /(?:\bto\b|\bkay\b)\s+([A-Za-zÀ-ÿ.'-]+(?:\s+[A-Za-zÀ-ÿ.'-]+)?)/i;
+const RECIPIENT_FALLBACK_RE =
+  /\b(?:send|pay|transfer|give|padala|magpadala|ipadala|bigay|ibigay|bayad|magbayad|pabayad|utang)\b\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Z][A-Za-zÀ-ÿ.'-]+)?)\b/;
 
 // "for dinner", "para sa dinner"
-const MEMO_RE = /(?:\bfor\b|\bpara sa\b)\s+(.+)$/i;
+const MEMO_RE = /(?:\bfor\b|\bpara sa\b|\bmemo:|\bnote:)\s*(.+)$/i;
 
-const BALANCE_RE = /\b(balance|how much|magkano)\b/i;
+const BALANCE_RE = /\b(balance|how much|magkano|natitira)\b/i;
 const BILL_RE = /\b(bill|meralco|water bill|electric bill|bayad)\b/i;
 const SEND_RE = /\b(send|pay|transfer|give|padala|magpadala|ipadala|bigay|ibigay|bayad|magbayad|pabayad|utang)\b/i;
 
 export function parseCommand(raw: string): ParsedCommand {
   const text = raw.trim();
 
-  if (BALANCE_RE.test(text)) {
-    return { intent: "check_balance", needsClarification: false };
-  }
-
   const isBill = BILL_RE.test(text);
   const isSend = SEND_RE.test(text) || isBill;
+  const isBalanceQuery = BALANCE_RE.test(text) && !isSend;
+
+  if (isBalanceQuery) {
+    return { intent: "check_balance", needsClarification: false };
+  }
 
   if (!isSend) {
     return { intent: "unknown", needsClarification: true, clarificationReason: "Could not determine what you want to do." };
@@ -71,7 +76,7 @@ export function parseCommand(raw: string): ParsedCommand {
   const currency = currencyRaw ? CURRENCY_ALIASES[currencyRaw] ?? currencyRaw.toUpperCase() : (text.includes("₱") ? "PHP" : undefined);
   const memo = memoMatch?.[1]?.trim();
   const textWithoutMemo = memoMatch ? text.slice(0, memoMatch.index).trim() : text;
-  const recipientMatch = textWithoutMemo.match(RECIPIENT_RE);
+  const recipientMatch = textWithoutMemo.match(RECIPIENT_RE) ?? textWithoutMemo.match(RECIPIENT_FALLBACK_RE);
   const recipientName = recipientMatch?.[1]?.trim();
 
   if (isBill) {
