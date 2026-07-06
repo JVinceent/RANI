@@ -1,3 +1,5 @@
+//updated 
+// 
 import { useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import {
@@ -9,8 +11,30 @@ import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { Header } from "./Header";
 import { SEP24Modal } from "./SEP24Modal";
+//import { buildTransaction, submitTransaction, getBalance, type Contact } from "../../lib/api";
+import { getBalance, addContact, parseCommand, type Contact } from "../../lib/api";
+
 
 const FF = "'DM Sans', sans-serif";
+
+const pillButtonStyle: CSSProperties = {
+  padding: "8px 16px",
+  borderRadius: 9,
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  color: "#E2EEFF",
+  fontSize: 13,
+  fontFamily: FF,
+  cursor: "pointer",
+};
+
+const pillButtonStylePrimary: CSSProperties = {
+  ...pillButtonStyle,
+  background: "#2563EB",
+  border: "none",
+  color: "#fff",
+  fontWeight: 600,
+};
 
 type ChatState =
   | "landing"
@@ -22,6 +46,14 @@ type ChatState =
 
 type PaymentState = Exclude<ChatState, "landing" | "balance">;
 
+type Balance = { xlm: string; usdc: string };
+
+type ChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+};
+
 /* ═══════════════════════════════════════════════════════════════════
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
@@ -31,7 +63,31 @@ export function ChatView() {
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
+  const [awaiting, setAwaiting] = useState<"recipient" | "amount" | null>(null);
+  const [candidates, setCandidates] = useState<Contact[] | null>(null);
+  const [resolvedContact, setResolvedContact] = useState<Contact | null>(null);
+  const [amount, setAmount] = useState<string | null>(null);
+  const [balance, setBalance] = useState<Balance | null>(null);
+  const [notFoundName, setNotFoundName] = useState<string | null>(null);
+  const [addingContactName, setAddingContactName] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const addMessage = (role: "user" | "assistant", text: string) => {
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role, text }]);
+  };
+
   const go = (next: ChatState) => setState(next);
+
+  const resetFlow = () => {
+    setAwaiting(null);
+    setCandidates(null);
+    setResolvedContact(null);
+    setAmount(null);
+    setNotFoundName(null);
+    setAddingContactName(null);
+    setMessages([]);
+    go("landing");
+  };
 
   const handleConfirm = () => {
     setState("success");
@@ -59,6 +115,184 @@ export function ChatView() {
     }, 280);
   };
 
+  const handleSend = async () => {
+    const text = inputValue.trim();
+    if (!text) return;
+    setInputValue("");
+
+    if (addingContactName) {
+      addMessage("user", text);
+      try {
+        const newContact = await addContact({ name: addingContactName, address: text });
+        addMessage("assistant", `Added ${newContact.name} to your contacts! How much would you like to send?`);
+        setResolvedContact(newContact);
+        setAddingContactName(null);
+        setAwaiting("amount");
+      } catch {
+        addMessage("assistant", "That doesn't look like a valid Stellar address — it should be 56 characters starting with G. Try again.");
+      }
+      return;
+    }
+
+    if (awaiting === "recipient") {
+      addMessage("user", text);
+      setNotFoundName(null);   // ADD THIS
+      setCandidates(null);     // ADD THIS
+      
+      try {
+        // Always try full NLP parsing first — handles the case where the
+        // user retypes a whole command instead of just a bare name.
+        const result = await parseCommand(text);
+
+        if (result.candidates && result.candidates.length > 1) {
+          addMessage("assistant", result.clarificationReason ?? `I found ${result.candidates.length} contacts — which one do you mean?`);
+          setCandidates(result.candidates);
+          return;
+        }
+
+        if (result.resolvedContact) {
+          setResolvedContact(result.resolvedContact);
+          if (result.amount) {
+            setAmount(result.amount);
+            try {
+              const bal = await getBalance();
+              setBalance(bal);
+            } catch {
+              setBalance(null);
+            }
+            setAwaiting(null);
+            go("summary");
+          } else {
+            addMessage("assistant", `Got it — how much would you like to send to ${result.resolvedContact.name}?`);
+            setAwaiting("amount");
+          }
+          return;
+        }
+
+        if (result.recipientName) {
+          // A known command extracted a name, but it's not a saved contact
+          addMessage("assistant", `"${result.recipientName}" isn't in your contacts yet.`);
+          setNotFoundName(result.recipientName);
+          return;
+        }
+
+        // Nothing structured was extracted — treat as a bare name (e.g. "Maria")
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/contacts/resolve?name=${encodeURIComponent(text)}`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("rani_token")}` } }
+        );
+        const { matches, ambiguous }: { matches: Contact[]; ambiguous: boolean } = await res.json();
+
+        if (!matches || matches.length === 0) {
+          addMessage("assistant", `"${text}" isn't in your contacts yet.`);
+          setNotFoundName(text);
+        } else if (ambiguous) {
+          addMessage("assistant", `I found ${matches.length} contacts — which one do you mean?`);
+          setCandidates(matches);
+        } else {
+          addMessage("assistant", `Got it — how much would you like to send to ${matches[0].name}?`);
+          setResolvedContact(matches[0]);
+          setCandidates(null);
+          setAwaiting("amount");
+        }
+      } catch {
+        addMessage("assistant", `"${text}" isn't in your contacts yet.`);
+        setNotFoundName(text);
+      }
+      return;
+    }
+
+if (awaiting === "amount") {
+      addMessage("user", text);
+      const match = text.match(/₱?\s?(\d+(?:\.\d+)?)/);
+      if (!match) return;
+      setAmount(match[1]);
+      setAwaiting(null);
+
+      try {
+        const bal = await getBalance();
+        setBalance(bal);
+      } catch {
+        setBalance(null);
+      }
+      go("summary");
+      return;
+    }
+
+    addMessage("user", text);
+    setNotFoundName(null);   
+    setCandidates(null);     
+    go("disambiguation"); // reuse this state to reveal the chat thread
+
+    try {
+      const result = await parseCommand(text);
+
+      if (result.intent === "check_balance") {
+        try {
+          const bal = await getBalance();
+          setBalance(bal);
+          addMessage("assistant", `Your balance is ${bal.xlm} XLM (≈ ${bal.usdc} USDC).`);
+        } catch {
+          addMessage("assistant", "I couldn't fetch your balance right now.");
+        }
+        return;
+      }
+
+      if (result.needsClarification) {
+        addMessage("assistant", result.clarificationReason ?? "Could you clarify that?");
+
+        if (result.candidates && result.candidates.length > 1) {
+          setCandidates(result.candidates);
+        } else if (result.resolvedContact) {
+          setResolvedContact(result.resolvedContact);
+          setAwaiting("amount");
+        } else if (result.recipientName) {
+          setNotFoundName(result.recipientName);
+        } else if (result.intent !== "unknown") {
+          setAwaiting("recipient");
+        }
+        return;
+      }
+
+      if (result.resolvedContact && result.amount) {
+        setResolvedContact(result.resolvedContact);
+        setAmount(result.amount);
+        try {
+          const bal = await getBalance();
+          setBalance(bal);
+        } catch {
+          setBalance(null);
+        }
+        go("summary");
+        return;
+      }
+
+      addMessage("assistant", "Sorry, I couldn't quite understand that.");
+    } catch {
+      addMessage("assistant", "Something went wrong trying to understand that.");
+    }
+  };
+
+  const handleSelectCandidate = (contact: Contact) => {
+    addMessage("user", contact.name);
+    addMessage("assistant", `Got it — how much would you like to send to ${contact.name}?`);
+    setResolvedContact(contact);
+    setCandidates(null);
+    setAwaiting("amount");
+  };
+
+  const handleTryAgain = () => {
+    addMessage("assistant", "No problem — who would you like to send to?");
+    setNotFoundName(null);
+    setAwaiting("recipient");
+  };
+
+  const handleAddContact = () => {
+  addMessage("assistant", `What's ${notFoundName}'s Stellar address?`);
+  setAddingContactName(notFoundName);
+  setNotFoundName(null);
+  };
+
   return (
     <div
       style={{
@@ -71,7 +305,6 @@ export function ChatView() {
     >
       <Header />
 
-      {/* ── Main content ── */}
       <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
         <AnimatePresence mode="wait">
           {state === "landing" ? (
@@ -84,7 +317,12 @@ export function ChatView() {
               style={{ height: "100%" }}
             >
               <LandingState
-                onSendMoney={() => go("disambiguation")}
+                onSendMoney={() => {
+                  addMessage("user", "Send Money");
+                  addMessage("assistant", "Sure — who would you like to send to?");
+                  setAwaiting("recipient");
+                  go("disambiguation");
+                }}
                 onCashIn={() => setShowSEP24(true)}
                 onCheckBalance={() => go("balance")}
               />
@@ -125,15 +363,22 @@ export function ChatView() {
             >
               <ChatThread
                 state={state as PaymentState}
-                onSelectMaria={() => go("summary")}
+                messages={messages}
+                candidates={candidates}
+                notFoundName={notFoundName}
+                resolvedContact={resolvedContact}
+                amount={amount}
+                balance={balance}
+                onSelectCandidate={handleSelectCandidate}
                 onReviewSend={() => go("confirm")}
-                onReset={() => go("landing")}
+                onReset={resetFlow}
+                onTryAgain={handleTryAgain}
+                onAddContact={handleAddContact}
               />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ── Confirm overlay ── */}
         <AnimatePresence>
           {state === "confirm" && (
             <motion.div
@@ -169,7 +414,6 @@ export function ChatView() {
         </AnimatePresence>
       </div>
 
-      {/* ── Input bar ── */}
       <div
         style={{
           padding: "14px 32px 20px",
@@ -193,6 +437,7 @@ export function ChatView() {
             placeholder='Try "Send ₱200 to Juan" or ask Rani anything...'
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
             style={{
               flex: 1,
               outline: "none",
@@ -220,6 +465,7 @@ export function ChatView() {
               <Mic size={15} color="#60A5FA" />
             </button>
             <button
+              onClick={handleSend}
               style={{
                 width: 36,
                 height: 36,
@@ -250,7 +496,6 @@ export function ChatView() {
         </p>
       </div>
 
-      {/* ── SEP-24 GCash modal ── */}
       <AnimatePresence>
         {showSEP24 && <SEP24Modal onClose={() => setShowSEP24(false)} />}
       </AnimatePresence>
@@ -283,7 +528,6 @@ function LandingState({
         padding: "0 40px",
       }}
     >
-      {/* AI Avatar */}
       <motion.div
         animate={{
           boxShadow: [
@@ -322,7 +566,6 @@ function LandingState({
         </motion.div>
       </motion.div>
 
-      {/* Greeting */}
       <div style={{ textAlign: "center", maxWidth: 500 }}>
         <div
           style={{
@@ -349,7 +592,6 @@ function LandingState({
         </div>
       </div>
 
-      {/* Quick-action pills */}
       <div
         style={{
           display: "flex",
@@ -451,67 +693,82 @@ function QuickPill({
 
 function ChatThread({
   state,
-  onSelectMaria,
+  messages,
+  candidates,
+  notFoundName,
+  resolvedContact,
+  amount,
+  balance,
+  onSelectCandidate,
   onReviewSend,
   onReset,
+  onTryAgain,
+  onAddContact,
 }: {
   state: PaymentState;
-  onSelectMaria: () => void;
+  messages: ChatMessage[];
+  candidates: Contact[] | null;
+  notFoundName: string | null;
+  resolvedContact: Contact | null;
+  amount: string | null;
+  balance: { xlm: string; usdc: string } | null;
+  onSelectCandidate: (c: Contact) => void;
   onReviewSend: () => void;
   onReset: () => void;
+  onTryAgain: () => void;
+  onAddContact: () => void;
 }) {
   return (
     <>
-      <DateSep label="Today, July 4" />
+      <DateSep label="Today" />
 
-      {/* User message */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <div
-          style={{
-            padding: "10px 16px",
-            borderRadius: "14px 14px 4px 14px",
-            background: "#2563EB",
-            maxWidth: 360,
-          }}
-        >
-          <p
-            style={{
-              color: "#fff",
-              fontSize: 14,
-              fontFamily: FF,
-              lineHeight: 1.5,
-              margin: 0,
-            }}
-          >
-            Send ₱500 to Maria for dinner
-          </p>
-          <div style={{ textAlign: "right", marginTop: 4 }}>
-            <span
+      {messages.map((m) =>
+        m.role === "user" ? (
+          <div key={m.id} style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div
               style={{
-                color: "rgba(255,255,255,0.4)",
-                fontSize: 11,
-                fontFamily: FF,
+                padding: "10px 16px",
+                borderRadius: "14px 14px 4px 14px",
+                background: "#2563EB",
+                maxWidth: 360,
               }}
             >
-              2:41 PM
-            </span>
+              <p style={{ color: "#fff", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
+                {m.text}
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        ) : (
+          <div key={m.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <AIAvatar />
+            <div style={{ maxWidth: 550 }}>
+              <AIChatBubble>{m.text}</AIChatBubble>
+            </div>
+          </div>
+        )
+      )}
 
-      {/* AI row */}
+      {/* Interactive cards — driven by state, not part of the log */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-        <AIAvatar />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            maxWidth: 550,
-          }}
-        >
+        <div style={{ width: 32, flexShrink: 0 }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 550 }}>
           <AnimatePresence mode="wait">
-            {state === "disambiguation" && (
+            {notFoundName && (
+              <motion.div
+                key="not-found-actions"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={onTryAgain} style={pillButtonStyle}>Try Again</button>
+                  <button onClick={onAddContact} style={pillButtonStylePrimary}>Add {notFoundName}</button>
+                </div>
+              </motion.div>
+            )}
+
+            {candidates && candidates.length > 1 && (
               <motion.div
                 key="d"
                 initial={{ opacity: 0, y: 6 }}
@@ -519,11 +776,11 @@ function ChatThread({
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
               >
-                <DisambiguationBlock onSelectMaria={onSelectMaria} />
+                <DisambiguationBlock candidates={candidates} onSelect={onSelectCandidate} />
               </motion.div>
             )}
 
-            {(state === "summary" || state === "confirm") && (
+            {(state === "summary" || state === "confirm") && resolvedContact && amount && (
               <motion.div
                 key="s"
                 initial={{ opacity: 0, y: 6 }}
@@ -531,7 +788,12 @@ function ChatThread({
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
               >
-                <SummaryBlock onReviewSend={onReviewSend} />
+                <SummaryBlock
+                  recipient={resolvedContact}
+                  amount={amount}
+                  balance={balance}
+                  onReviewSend={onReviewSend}
+                />
               </motion.div>
             )}
 
@@ -557,200 +819,87 @@ function ChatThread({
    STATE 2 — DISAMBIGUATION
 ═══════════════════════════════════════════════════════════════════ */
 
-function DisambiguationBlock({ onSelectMaria }: { onSelectMaria: () => void }) {
+const DISAMBIGUATION_COLORS = ["#EC4899", "#F97316", "#22D3EE", "#A78BFA", "#4ADE80"];
+
+function DisambiguationBlock({
+  candidates,
+  onSelect,
+}: {
+  candidates: Contact[];
+  onSelect: (c: Contact) => void;
+}) {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <AIChatBubble>
         I found{" "}
-        <span style={{ color: "#E2EEFF", fontWeight: 600 }}>2 contacts</span>{" "}
-        named Maria — which one do you mean?
+        <span style={{ color: "#E2EEFF", fontWeight: 600 }}>{candidates.length} contacts</span>{" "}
+        — which one do you mean?
       </AIChatBubble>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 460 }}>
-        {/* Maria Dela Cruz — pink */}
-        <motion.button
-          onClick={onSelectMaria}
-          onMouseEnter={() => setHovered("mdc")}
-          onMouseLeave={() => setHovered(null)}
-          whileHover={{ x: 2 }}
-          transition={{ duration: 0.12 }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            padding: "15px 18px",
-            borderRadius: 14,
-            background:
-              hovered === "mdc"
-                ? "rgba(236,72,153,0.09)"
-                : "rgba(255,255,255,0.04)",
-            border: `1.5px solid ${
-              hovered === "mdc"
-                ? "rgba(236,72,153,0.4)"
-                : "rgba(255,255,255,0.08)"
-            }`,
-            cursor: "pointer",
-            textAlign: "left",
-            transition: "background 150ms, border-color 150ms",
-          }}
-        >
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: "50%",
-              background: "rgba(236,72,153,0.14)",
-              border: "1.5px solid rgba(236,72,153,0.32)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                color: "#EC4899",
-                fontSize: 13,
-                fontWeight: 700,
-                fontFamily: FF,
-              }}
-            >
-              MD
-            </span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                color: "#F0F6FF",
-                fontSize: 14,
-                fontWeight: 600,
-                fontFamily: FF,
-              }}
-            >
-              Maria Dela Cruz
-            </div>
-            <div
-              style={{
-                color: "#3A5070",
-                fontSize: 12,
-                fontFamily: FF,
-                marginTop: 2,
-              }}
-            >
-              @mariadelacruz · GBXYZ...4A2M
-            </div>
-          </div>
-          <ArrowRight
-            size={16}
-            color={hovered === "mdc" ? "#EC4899" : "#2A3F5C"}
-          />
-        </motion.button>
+        {candidates.map((contact, i) => {
+          const color = DISAMBIGUATION_COLORS[i % DISAMBIGUATION_COLORS.length];
+          const isHovered = hovered === contact.id;
+          const initials = contact.name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
 
-        {/* Maria Santos — orange */}
-        <motion.button
-          onMouseEnter={() => setHovered("ms")}
-          onMouseLeave={() => setHovered(null)}
-          whileHover={{ x: 2 }}
-          transition={{ duration: 0.12 }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            padding: "15px 18px",
-            borderRadius: 14,
-            background:
-              hovered === "ms"
-                ? "rgba(249,115,22,0.07)"
-                : "rgba(255,255,255,0.04)",
-            border: `1.5px solid ${
-              hovered === "ms"
-                ? "rgba(249,115,22,0.38)"
-                : "rgba(255,255,255,0.08)"
-            }`,
-            cursor: "pointer",
-            textAlign: "left",
-            transition: "background 150ms, border-color 150ms",
-          }}
-        >
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: "50%",
-              background: "rgba(249,115,22,0.14)",
-              border: "1.5px solid rgba(249,115,22,0.3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <span
+          return (
+            <motion.button
+              key={contact.id}
+              onClick={() => onSelect(contact)}
+              onMouseEnter={() => setHovered(contact.id)}
+              onMouseLeave={() => setHovered(null)}
+              whileHover={{ x: 2 }}
+              transition={{ duration: 0.12 }}
               style={{
-                color: "#F97316",
-                fontSize: 13,
-                fontWeight: 700,
-                fontFamily: FF,
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "15px 18px",
+                borderRadius: 14,
+                background: isHovered ? `${color}18` : "rgba(255,255,255,0.04)",
+                border: `1.5px solid ${isHovered ? `${color}66` : "rgba(255,255,255,0.08)"}`,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "background 150ms, border-color 150ms",
               }}
             >
-              MS
-            </span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                color: "#F0F6FF",
-                fontSize: 14,
-                fontWeight: 600,
-                fontFamily: FF,
-              }}
-            >
-              Maria Santos
-            </div>
-            <div
-              style={{
-                color: "#3A5070",
-                fontSize: 12,
-                fontFamily: FF,
-                marginTop: 2,
-              }}
-            >
-              @mariasantos · GDABC...9K7P
-            </div>
-          </div>
-          <ArrowRight
-            size={16}
-            color={hovered === "ms" ? "#F97316" : "#2A3F5C"}
-          />
-        </motion.button>
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: "50%",
+                  background: `${color}24`,
+                  border: `1.5px solid ${color}52`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ color, fontSize: 13, fontWeight: 700, fontFamily: FF }}>
+                  {initials}
+                </span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
+                  {contact.name}
+                </div>
+                <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
+                  {contact.address.slice(0, 6)}...{contact.address.slice(-4)}
+                </div>
+              </div>
+              <ArrowRight size={16} color={isHovered ? color : "#2A3F5C"} />
+            </motion.button>
+          );
+        })}
       </div>
-
-      {/* Manual address link */}
-      <button
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "0 2px",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-        }}
-      >
-        <span
-          style={{
-            color: "#2563EB",
-            fontSize: 13,
-            fontFamily: FF,
-            fontWeight: 500,
-          }}
-        >
-          Type address manually
-        </span>
-        <ArrowRight size={12} color="#2563EB" />
-      </button>
     </div>
   );
 }
@@ -759,14 +908,30 @@ function DisambiguationBlock({ onSelectMaria }: { onSelectMaria: () => void }) {
    STATE 3 — SUMMARY CARD
 ═══════════════════════════════════════════════════════════════════ */
 
-function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
+function SummaryBlock({
+  recipient,
+  amount,
+  balance,
+  onReviewSend,
+}: {
+  recipient: Contact;
+  amount: string;
+  balance: { xlm: string; usdc: string } | null;
+  onReviewSend: () => void;
+}) {
   const [hover, setHover] = useState(false);
+  const initials = recipient.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <AIChatBubble>
         Got it! Sending to{" "}
-        <span style={{ color: "#EC4899", fontWeight: 600 }}>Maria Dela Cruz</span>
+        <span style={{ color: "#EC4899", fontWeight: 600 }}>{recipient.name}</span>
         . Review the details:
       </AIChatBubble>
 
@@ -780,7 +945,6 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
         }}
       >
         <div style={{ padding: "22px 24px" }}>
-          {/* Balance */}
           <div
             style={{
               display: "flex",
@@ -813,7 +977,7 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
                   lineHeight: 1,
                 }}
               >
-                ₱ 4,850.00
+                {balance ? `${balance.xlm} XLM` : "—"}
               </div>
               <div
                 style={{
@@ -823,7 +987,7 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
                   marginTop: 3,
                 }}
               >
-                ≈ 588.6 USDC
+                {balance ? `≈ ${balance.usdc} USDC` : ""}
               </div>
             </div>
             <div
@@ -850,7 +1014,6 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
             }}
           />
 
-          {/* Sending to / Amount */}
           <div
             style={{
               display: "flex",
@@ -895,7 +1058,7 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
                       fontFamily: FF,
                     }}
                   >
-                    MD
+                    {initials}
                   </span>
                 </div>
                 <div>
@@ -907,7 +1070,7 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
                       fontFamily: FF,
                     }}
                   >
-                    Maria Dela Cruz
+                    {recipient.name}
                   </div>
                   <div
                     style={{
@@ -917,7 +1080,7 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
                       marginTop: 1,
                     }}
                   >
-                    GBXYZ...4A2M
+                    {recipient.address.slice(0, 6)}...{recipient.address.slice(-4)}
                   </div>
                 </div>
               </div>
@@ -946,17 +1109,7 @@ function SummaryBlock({ onReviewSend }: { onReviewSend: () => void }) {
                   lineHeight: 1,
                 }}
               >
-                ₱ 500.00
-              </div>
-              <div
-                style={{
-                  color: "#3A5070",
-                  fontSize: 11,
-                  fontFamily: FF,
-                  marginTop: 2,
-                }}
-              >
-                ≈ 8.5 USDC
+                ₱ {amount}
               </div>
             </div>
           </div>
@@ -1017,7 +1170,6 @@ function ConfirmModal({
         overflow: "hidden",
       }}
     >
-      {/* Header */}
       <div
         style={{
           padding: "20px 24px",
@@ -1087,7 +1239,6 @@ function ConfirmModal({
       </div>
 
       <div style={{ padding: "20px 24px" }}>
-        {/* Amount box */}
         <div
           style={{
             display: "flex",
@@ -1157,7 +1308,6 @@ function ConfirmModal({
           </div>
         </div>
 
-        {/* Details */}
         {[
           { label: "Recipient", value: "Maria Dela Cruz", sub: "GBXYZ...4A2M" },
           { label: "Network Fee", value: "₱0.0004", sub: "≈ 0.000069 XLM" },
@@ -1206,7 +1356,6 @@ function ConfirmModal({
           </div>
         ))}
 
-        {/* Warning */}
         <div
           style={{
             display: "flex",
@@ -1238,7 +1387,6 @@ function ConfirmModal({
           </p>
         </div>
 
-        {/* Buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <button
             onClick={onConfirm}
@@ -1308,7 +1456,6 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
           width: 480,
         }}
       >
-        {/* Banner */}
         <div
           style={{
             padding: "20px 24px",
@@ -1362,7 +1509,6 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
         </div>
 
         <div style={{ padding: "20px 24px" }}>
-          {/* Amounts */}
           <div
             style={{
               display: "flex",
@@ -1436,7 +1582,6 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
             }}
           />
 
-          {/* Receipt rows */}
           <div
             style={{
               display: "flex",
@@ -1483,7 +1628,6 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
             ))}
           </div>
 
-          {/* Explorer link */}
           <a
             href="#"
             style={{
@@ -1662,9 +1806,8 @@ const PORTFOLIO_ASSETS = [
 function BalanceChatThread({ onReset }: { onReset: () => void }) {
   return (
     <>
-      <DateSep label="Today, July 4" />
+      <DateSep label="Today" />
 
-      {/* User trigger */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <div
           style={{
@@ -1687,13 +1830,9 @@ function BalanceChatThread({ onReset }: { onReset: () => void }) {
           >
             Check my wallet balance
           </span>
-          <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontFamily: FF, marginLeft: 4 }}>
-            2:43 PM
-          </span>
         </div>
       </div>
 
-      {/* AI response */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
         <AIAvatar />
         <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 540 }}>
@@ -1718,7 +1857,6 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
         width: 480,
       }}
     >
-      {/* Total portfolio */}
       <div
         style={{
           padding: "22px 24px 18px",
@@ -1777,7 +1915,6 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
         </div>
       </div>
 
-      {/* Asset rows */}
       <div style={{ padding: "8px 0" }}>
         {PORTFOLIO_ASSETS.map((asset, i) => (
           <div
@@ -1793,7 +1930,6 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
                   : "none",
             }}
           >
-            {/* Icon */}
             <div
               style={{
                 width: 38,
@@ -1819,7 +1955,6 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
               </span>
             </div>
 
-            {/* Name */}
             <div style={{ flex: 1 }}>
               <div
                 style={{
@@ -1838,7 +1973,6 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
               </div>
             </div>
 
-            {/* Balance + change */}
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
@@ -1865,7 +1999,6 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
         ))}
       </div>
 
-      {/* Footer */}
       <div
         style={{
           padding: "12px 24px",

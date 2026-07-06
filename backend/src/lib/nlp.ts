@@ -47,7 +47,7 @@ const MEMO_RE = /(?:\bfor\b|\bpara sa\b)\s+(.+)$/i;
 
 const BALANCE_RE = /\b(balance|how much|magkano)\b/i;
 const BILL_RE = /\b(bill|meralco|water bill|electric bill|bayad)\b/i;
-const SEND_RE = /\b(send|pay|pabayad|bigay)\b/i;
+const SEND_RE = /\b(send|pay|transfer|give|padala|magpadala|ipadala|bigay|ibigay|bayad|magbayad|pabayad|utang)\b/i;
 
 export function parseCommand(raw: string): ParsedCommand {
   const text = raw.trim();
@@ -64,15 +64,15 @@ export function parseCommand(raw: string): ParsedCommand {
   }
 
   const amountMatch = text.match(AMOUNT_RE);
-  const recipientMatch = text.match(RECIPIENT_RE);
   const memoMatch = text.match(MEMO_RE);
 
   const amount = amountMatch ? (amountMatch[1] ?? amountMatch[2]) : undefined;
   const currencyRaw = amountMatch?.[3]?.toLowerCase();
   const currency = currencyRaw ? CURRENCY_ALIASES[currencyRaw] ?? currencyRaw.toUpperCase() : (text.includes("₱") ? "PHP" : undefined);
-
-  const recipientName = recipientMatch?.[1]?.trim();
   const memo = memoMatch?.[1]?.trim();
+  const textWithoutMemo = memoMatch ? text.slice(0, memoMatch.index).trim() : text;
+  const recipientMatch = textWithoutMemo.match(RECIPIENT_RE);
+  const recipientName = recipientMatch?.[1]?.trim();
 
   if (isBill) {
     return {

@@ -15,38 +15,45 @@ parseRouter.post("/", async (req: AuthedRequest, res) => {
 
   const command = parseCommand(parsed.data.text);
 
-  // Feeds ClarificationState.tsx directly when ambiguous
-  if (command.needsClarification || command.intent === "unknown") {
+  // No recipient name to look up at all, or intent wasn't understood —
+  // nothing to resolve, return as-is.
+  if (command.intent === "unknown" || !command.recipientName) {
     return res.json(command);
   }
 
-  if (command.intent === "send_payment" && command.recipientName) {
-    const { data: matches, error } = await supabase
-      .from("contacts")
-      .select("*")
-      .eq("user_id", req.userId!)
-      .ilike("name", `%${command.recipientName}%`);
+  // A recipient name was extracted — always attempt to resolve it,
+  // even if amount is still missing. This keeps "send 500 to juan"
+  // and "send to juan" -> "500" behaving the same way, instead of
+  // skipping resolution whenever amount happens to be absent.
+  const { data: matches, error } = await supabase
+    .from("contacts")
+    .select("*")
+    .eq("user_id", req.userId!)
+    .ilike("name", `%${command.recipientName}%`);
 
-    if (error) return res.status(500).json({ error: error.message });
+  if (error) return res.status(500).json({ error: error.message });
 
-    if (matches.length === 0) {
-      return res.json({
-        ...command,
-        needsClarification: true,
-        clarificationReason: `No saved contact named "${command.recipientName}". Add them first?`,
-      });
-    }
-    if (matches.length > 1) {
-      return res.json({
-        ...command,
-        needsClarification: true,
-        clarificationReason: `Multiple contacts match "${command.recipientName}" — which one?`,
-        candidates: matches,
-      });
-    }
-
-    return res.json({ ...command, resolvedContact: matches[0] });
+  if (matches.length === 0) {
+    return res.json({
+      ...command,
+      needsClarification: true,
+      clarificationReason: `No saved contact named "${command.recipientName}". Add them first?`,
+    });
   }
 
-  res.json(command);
+  if (matches.length > 1) {
+    return res.json({
+      ...command,
+      needsClarification: true,
+      clarificationReason: `Multiple contacts match "${command.recipientName}" — which one?`,
+      candidates: matches,
+    });
+  }
+
+  return res.json({
+    ...command,
+    resolvedContact: matches[0],
+    needsClarification: !command.amount,
+    clarificationReason: !command.amount ? "How much would you like to send?" : undefined,
+  });
 });
