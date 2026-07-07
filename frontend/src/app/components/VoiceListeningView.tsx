@@ -13,14 +13,16 @@ const WAVE = [
 ];
 
 interface VoiceListeningViewProps {
+  userName?: string;
   onCancel?: () => void;
+  
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
 
-export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
+export function VoiceListeningView({ userName = "there", onCancel }: VoiceListeningViewProps) {
   return (
     <div
       style={{
@@ -87,7 +89,7 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
               marginBottom: 10,
             }}
           >
-            Hey, Regina 👋
+          Hey, {userName}!
           </div>
           <div
             style={{ color: "#4A6080", fontSize: 15, fontFamily: FF }}

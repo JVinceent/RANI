@@ -5,6 +5,8 @@ import {
   Lock, Plus, Trash2, Check, ChevronRight, Camera,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { saveName, saveEmail } from "../../lib/api";
+
 
 const FF = "'DM Sans', sans-serif";
 
@@ -27,6 +29,10 @@ const TABS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 
 interface FullSettingsViewProps {
   defaultTab?: SettingsTab;
+  userName: string;
+  onNameChange: (name: string) => void;
+  userEmail: string;
+  onEmailChange: (email: string) => void;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -35,6 +41,10 @@ interface FullSettingsViewProps {
 
 export function FullSettingsView({
   defaultTab = "profile",
+  userName,
+  onNameChange,
+  userEmail,
+  onEmailChange,
 }: FullSettingsViewProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>(defaultTab);
 
@@ -72,7 +82,14 @@ export function FullSettingsView({
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
             >
-              {activeTab === "profile" && <ProfileVariant />}
+              {activeTab === "profile" && (
+                <ProfileVariant
+                  userName={userName}
+                  onNameChange={onNameChange}
+                  userEmail={userEmail}
+                  onEmailChange={onEmailChange}
+                />
+              )}
               {activeTab === "wallet" && <WalletVariant />}
               {activeTab === "security" && <SecurityVariant />}
               {activeTab === "notifications" && <NotificationsVariant />}
@@ -239,13 +256,55 @@ function SettingsSubNav({
 /* ═══════════════════════════════════════════════════════════════════
    VARIANT A — PROFILE
 ═══════════════════════════════════════════════════════════════════ */
+interface ProfileVariantProps {
+  userName: string;
+  onNameChange: (name: string) => void;
+  userEmail: string;
+  onEmailChange: (email: string) => void;
+}
 
-function ProfileVariant() {
-  const [displayName, setDisplayName] = useState("Regina");
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function ProfileVariant({ userName, onNameChange, userEmail, onEmailChange }: ProfileVariantProps) {
+  const [displayName, setDisplayName] = useState(userName);
+  const [displayEmail, setDisplayEmail] = useState(userEmail);
   const [showAddress, setShowAddress] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
 
+  const handleSave = async () => {
+  const trimmedName = displayName.trim();
+  const trimmedEmail = displayEmail.trim();
+  if (saving) return;
+
+  setEmailError(null);
+  setSaveError(null);
+
+  if (trimmedEmail && !EMAIL_REGEX.test(trimmedEmail)) {
+    setEmailError("Enter a valid email address (e.g. name@example.com).");
+    return;
+  }
+  if (!trimmedName) return;
+
+  setSaving(true);
+  try {
+    if (trimmedName !== userName) {
+      const result = await saveName(trimmedName);
+      onNameChange(result.name);
+    }
+    if (trimmedEmail && trimmedEmail !== userEmail) {
+      const result = await saveEmail(trimmedEmail);
+      onEmailChange(result.email);
+    }
+  } catch (e: any) {
+    setSaveError(e.message ?? "Could not save your changes.");
+  } finally {
+    setSaving(false);
+  }
+};
   return (
     <div style={{ maxWidth: 560 }}>
       <SectionTitle>Profile</SectionTitle>
@@ -294,7 +353,7 @@ function ProfileVariant() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                R
+                {(displayName.trim()[0] ?? "?").toUpperCase()}
               </span>
             </div>
           </div>
@@ -357,10 +416,20 @@ function ProfileVariant() {
           <input
             type="email"
             placeholder="hello@example.com"
+            value={displayEmail}
+            onChange={(e) => {
+              setDisplayEmail(e.target.value);
+              if (emailError) setEmailError(null);
+            }}
             onFocus={() => setEmailFocused(true)}
             onBlur={() => setEmailFocused(false)}
             style={{ ...inputStyle(emailFocused) }}
           />
+          {emailError && (
+            <div style={{ color: "#F87171", fontSize: 12, fontFamily: FF, marginTop: 6 }}>
+              {emailError}
+            </div>
+          )}
         </FieldGroup>
       </div>
 
@@ -427,8 +496,11 @@ function ProfileVariant() {
       </div>
 
       {/* Save */}
-      <div style={{ marginTop: 32 }}>
-        <SaveButton />
+      <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 14 }}>
+        <SaveButton onClick={handleSave} saving={saving} />
+        {saveError && (
+          <span style={{ color: "#F87171", fontSize: 13, fontFamily: FF }}>{saveError}</span>
+        )}
       </div>
     </div>
   );
@@ -1192,18 +1264,27 @@ function inputStyle(focused: boolean): CSSProperties {
   };
 }
 
-function SaveButton() {
+function SaveButton({
+  onClick,
+  saving,
+}: {
+  onClick?: () => void;
+  saving?: boolean;
+}) {
   const [hover, setHover] = useState(false);
   return (
     <button
+      onClick={onClick}
+      disabled={saving}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
         padding: "12px 28px",
         borderRadius: 11,
-        background: hover ? "#1D4ED8" : "#2563EB",
+        background: hover && !saving ? "#1D4ED8" : "#2563EB",
         border: "none",
-        cursor: "pointer",
+        cursor: saving ? "default" : "pointer",
+        opacity: saving ? 0.7 : 1,
         color: "#fff",
         fontSize: 14,
         fontWeight: 600,
@@ -1212,7 +1293,7 @@ function SaveButton() {
         boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
       }}
     >
-      Save changes
+      {saving ? "Saving…" : "Save changes"}
     </button>
   );
 }

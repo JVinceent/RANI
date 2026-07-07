@@ -1,28 +1,117 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, UserPlus, Send, Copy, ExternalLink } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { Header } from "./Header";
 import { AddContactModal } from "./AddContactModal";
-import { addContact } from "../../lib/api";
+import { addContact, getContacts, streamContacts, type Contact } from "../../lib/api";
+
 
 const FF = "'DM Sans', sans-serif";
 
-const CONTACTS = [
-  { id: "1", initials: "MD", name: "Maria Dela Cruz", handle: "@mariadelacruz", address: "GBXYZ4NP2WQMZ7A3JKL2A4A2M", tag: "Frequent", tagColor: "#EC4899", tagBg: "rgba(236,72,153,0.1)", avatarColor: "#EC4899", avatarBg: "rgba(236,72,153,0.14)", lastSent: "2h ago" },
-  { id: "2", initials: "MS", name: "Maria Santos", handle: "@mariasantos", address: "GDABC9K7PQRS2NV3M8WXY1ZA4B", tag: "Family", tagColor: "#F97316", tagBg: "rgba(249,115,22,0.1)", avatarColor: "#F97316", avatarBg: "rgba(249,115,22,0.14)", lastSent: "1d ago" },
-  { id: "3", initials: "JR", name: "Juan Reyes", handle: "@juanreyes", address: "GDABC9KLP3VNXQ8WM7Z9K7P2NR", tag: "Family", tagColor: "#4ADE80", tagBg: "rgba(34,197,94,0.1)", avatarColor: "#4ADE80", avatarBg: "rgba(34,197,94,0.1)", lastSent: "3d ago" },
-  { id: "4", initials: "AC", name: "Ana Cruz", handle: "@anacruz", address: "GHABC3MN5PQRS7VW9XY1Z2AB4C", tag: "Work", tagColor: "#FCD34D", tagBg: "rgba(245,158,11,0.1)", avatarColor: "#FCD34D", avatarBg: "rgba(245,158,11,0.1)", lastSent: "2w ago" },
-  { id: "5", initials: "PG", name: "Pedro Garcia", handle: "@pedrogarcia", address: "GIBCD4NO6QRST8WX1YZ3ABC5DE", tag: "Landlord", tagColor: "#C4B5FD", tagBg: "rgba(139,92,246,0.1)", avatarColor: "#C4B5FD", avatarBg: "rgba(139,92,246,0.1)", lastSent: "1mo ago" },
-  { id: "6", initials: "LC", name: "Liza Corpuz", handle: "@lizacorpuz", address: "GJCDE5OP7RSTU9XY2ZA4BCD6EF", tag: "Friend", tagColor: "#60A5FA", tagBg: "rgba(37,99,235,0.12)", avatarColor: "#60A5FA", avatarBg: "rgba(37,99,235,0.12)", lastSent: "3mo ago" },
+// Deterministic palette so the same contact always gets the same
+// avatar/tag color across reloads, instead of it changing every fetch.
+const PALETTE = [
+  { color: "#EC4899", bg: "rgba(236,72,153,0.1)" },
+  { color: "#F97316", bg: "rgba(249,115,22,0.1)" },
+  { color: "#4ADE80", bg: "rgba(34,197,94,0.1)" },
+  { color: "#FCD34D", bg: "rgba(245,158,11,0.1)" },
+  { color: "#C4B5FD", bg: "rgba(139,92,246,0.1)" },
+  { color: "#60A5FA", bg: "rgba(37,99,235,0.12)" },
 ];
 
+function colorFor(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return PALETTE[hash % PALETTE.length];
+}
+
+function initialsFor(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?";
+}
+
+// What the UI renders. Fields not in the DB (initials, colors, handle)
+// are derived client-side from the real name/id — never stored.
+interface DisplayContact {
+  id: string;
+  name: string;
+  handle: string;
+  address: string;
+  tag?: string | null;
+  initials: string;
+  avatarColor: string;
+  avatarBg: string;
+  tagColor: string;
+  tagBg: string;
+  lastSent: string;
+}
+
+function toDisplay(c: Contact): DisplayContact {
+  const palette = colorFor(c.id);
+  return {
+    id: c.id,
+    name: c.name,
+    handle: "@" + c.name.toLowerCase().replace(/\s+/g, ""),
+    address: c.address,
+    tag: c.tag,
+    initials: initialsFor(c.name),
+    avatarColor: palette.color,
+    avatarBg: palette.bg,
+    tagColor: palette.color,
+    tagBg: palette.bg,
+    lastSent: "—", // stub — needs a transactions join to be real
+  };
+}
+
 export function ContactsView() {
+  const [contacts, setContacts] = useState<DisplayContact[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [hovered, setHovered] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [showAddContact, setShowAddContact] = useState(false);
 
-  const filtered = CONTACTS.filter(
+  const loadContacts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getContacts();
+      setContacts(data.map(toDisplay));
+    } catch (e: any) {
+      setError(e.message ?? "Failed to load contacts");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadContacts();
+  }, [loadContacts]);
+
+  useEffect(() => {
+  const unsubscribe = streamContacts((eventType, payload) => {
+    setContacts((prev) => {
+      if (eventType === "INSERT") {
+        const incoming = toDisplay(payload.new as Contact);
+        if (prev.some((c) => c.id === incoming.id)) return prev; // dedupe
+        return [...prev, incoming];
+      }
+      if (eventType === "UPDATE") {
+        const updated = toDisplay(payload.new as Contact);
+        return prev.map((c) => (c.id === updated.id ? updated : c));
+      }
+      if (eventType === "DELETE") {
+        return prev.filter((c) => c.id !== payload.old.id);
+      }
+      return prev;
+    });
+  });
+
+  return unsubscribe;
+}, []);
+
+  const filtered = contacts.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.handle.toLowerCase().includes(search.toLowerCase())
@@ -42,7 +131,7 @@ export function ContactsView() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
         <div>
           <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Contacts</div>
-          <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{CONTACTS.length} saved on Stellar</div>
+          <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{contacts.length} saved on Stellar</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", width: 220 }}>
@@ -147,6 +236,18 @@ export function ContactsView() {
           </div>
         ))}
 
+        {loading && (
+          <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, padding: "40px 0", textAlign: "center" }}>
+            Loading contacts…
+          </div>
+        )}
+
+        {error && !loading && (
+          <div style={{ color: "#F87171", fontSize: 13, fontFamily: FF, padding: "20px 0", textAlign: "center" }}>
+            {error}
+          </div>
+        )}
+
         {filtered.length === 0 && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 12 }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -166,13 +267,10 @@ export function ContactsView() {
             onSave={async (data) => {
               try {
                 await addContact(data);
+                await loadContacts(); // refresh from DB so the new contact actually shows up
               } catch (e: any) {
                 console.error("Failed to save contact:", e.message);
-                // NOTE: the display list above (CONTACTS) is still static
-                // demo data — swap it for a real fetch via getContacts()
-                // once you're ready to replace the hardcoded array with
-                // live data (needs Stellar addresses to be valid 56-char
-                // keys, since the backend validates that).
+                setError(e.message ?? "Failed to save contact");
               }
               setShowAddContact(false);
             }}

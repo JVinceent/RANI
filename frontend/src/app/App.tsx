@@ -19,6 +19,7 @@ export default function App() {
   const [activeView, setActiveView] = useState<AppView>("chat");
   const [authError, setAuthError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
 
   const handleConnect = async () => {
@@ -40,6 +41,7 @@ export default function App() {
 
       if (data.name) {
         setUserName(data.name);
+        setUserEmail(data.email); 
         setScreen("main");
       } else {
         setScreen("onboarding");
@@ -112,10 +114,19 @@ export default function App() {
         {activeView === "contacts" && <ContactsView />}
         {activeView === "history" && <HistoryView />}
         {activeView === "voice" && (
-          <VoiceListeningView onCancel={() => setActiveView("chat")} />
+          <VoiceListeningView
+            userName={userName ?? "there"}
+            onCancel={() => setActiveView("chat")}
+          />
         )}
         {activeView === "settings" && (
-          <FullSettingsView defaultTab="profile" />
+          <FullSettingsView
+            defaultTab="profile"
+            userName={userName ?? "there"}
+            onNameChange={setUserName}
+            userEmail={userEmail ?? ""}
+            onEmailChange={setUserEmail}
+          />
         )}
       </div>
     </div>

@@ -64,17 +64,17 @@ authRouter.post("/connect-freighter", async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  if (error) return res.status(500).json({ error: error.message });
-
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
   res.json({
     token,
     userId: user.id,
     stellarPublicKey: user.stellar_public_key,
     name: user.name ?? null,
+    email: user.email ?? null,
   });
+});
 
-  authRouter.patch("/name", requireAuth, async (req: AuthedRequest, res) => {
+authRouter.patch("/name", requireAuth, async (req: AuthedRequest, res) => {
   const schema = z.object({ name: z.string().min(1).max(50) });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -89,5 +89,4 @@ authRouter.post("/connect-freighter", async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
 
   res.json({ name: user.name });
-  });
 });

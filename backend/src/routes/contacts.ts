@@ -1,9 +1,54 @@
+import jwt from "jsonwebtoken";
 import { Router } from "express";
 import { z } from "zod";
 import { supabase } from "../db";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
 
 export const contactsRouter = Router();
+
+contactsRouter.get("/stream", async (req, res) => {
+  const token = String(req.query.token ?? "");
+  let userId: string;
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+    userId = payload.userId;
+  } catch {
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  const send = (event: string, data: unknown) => {
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  // Service-role client sees every row change; we filter to this
+  // user's own contacts before ever writing to the response stream.
+  const channel = supabase
+    .channel(`contacts-changes-${userId}`)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "contacts", filter: `user_id=eq.${userId}` },
+      (payload) => {
+        send(payload.eventType, payload); // INSERT | UPDATE | DELETE
+      }
+    )
+    .subscribe();
+
+  // keep the connection alive through proxies/load balancers
+  const heartbeat = setInterval(() => res.write(": ping\n\n"), 25000);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    supabase.removeChannel(channel);
+    res.end();
+  });
+});
+
 contactsRouter.use(requireAuth);
 
 contactsRouter.get("/", async (req: AuthedRequest, res) => {

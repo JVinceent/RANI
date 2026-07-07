@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
-function getToken(): string | null {
+export function getToken(): string | null {
   return localStorage.getItem("rani_token");
 }
 
@@ -28,7 +28,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ── Auth ──────────────────────────────────────────────────────────
 export async function connectFreighter(email: string, publicKey: string) {
-  const data = await request<{ token: string; userId: string; stellarPublicKey: string; name: string | null }>(
+  const data = await request<{ token: string; userId: string; stellarPublicKey: string; name: string | null; email: string | null }>(
     "/auth/connect-freighter",
     { method: "POST", body: JSON.stringify({ email, publicKey }) }
   );
@@ -40,6 +40,13 @@ export async function saveName(name: string) {
   return request<{ name: string }>("/auth/name", {
     method: "PATCH",
     body: JSON.stringify({ name }),
+  });
+}
+
+export async function saveEmail(email: string) {
+  return request<{ email: string }>("/auth/email", {
+    method: "PATCH",
+    body: JSON.stringify({ email }),
   });
 }
 
@@ -113,3 +120,23 @@ export const submitTransaction = (data: { transactionId: string; signedXdr: stri
   );
 
 export const getHistory = () => request<any[]>("/transactions/history");
+
+export function streamContacts(
+  onChange: (eventType: "INSERT" | "UPDATE" | "DELETE", payload: any) => void
+) {
+  const token = getToken();
+  if (!token) return () => {};
+
+  const es = new EventSource(`${API_URL}/contacts/stream?token=${encodeURIComponent(token)}`);
+
+  (["INSERT", "UPDATE", "DELETE"] as const).forEach((eventType) => {
+    es.addEventListener(eventType, (e: MessageEvent) => {
+      onChange(eventType, JSON.parse(e.data));
+    });
+  });
+
+  es.onerror = () => {
+  };
+
+  return () => es.close();
+}
