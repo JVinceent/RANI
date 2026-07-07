@@ -18,6 +18,7 @@ export default function App() {
   const [screen, setScreen] = useState<AppScreen>("auth");
   const [activeView, setActiveView] = useState<AppView>("chat");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
 
   const handleConnect = async () => {
@@ -38,8 +39,13 @@ export default function App() {
       // MVP simplification: derive a stable pseudo-email from the wallet
       // address so we don't need a separate signup step for the demo.
       // Replace with a real email/identity flow before shipping.
-      await connectFreighter(`${walletPublicKey.slice(0, 12).toLowerCase()}@rani.local`, walletPublicKey);
-      setScreen("onboarding");
+      const data = await connectFreighter(`${walletPublicKey.slice(0, 12).toLowerCase()}@rani.local`, walletPublicKey);
+      if (data.name) {
+          setUserName(data.name);
+          setScreen("main");        // skip onboarding entirely
+        } else {
+          setScreen("onboarding");  // first time — ask for name
+        }
     } catch (e: any) {
       setAuthError(e.message ?? "Could not reach the backend.");
     }

@@ -28,7 +28,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ── Auth ──────────────────────────────────────────────────────────
 export async function connectFreighter(email: string, publicKey: string) {
-  const data = await request<{ token: string; userId: string; stellarPublicKey: string }>(
+  const data = await request<{ token: string; userId: string; stellarPublicKey: string; name: string | null }>(
     "/auth/connect-freighter",
     { method: "POST", body: JSON.stringify({ email, publicKey }) }
   );

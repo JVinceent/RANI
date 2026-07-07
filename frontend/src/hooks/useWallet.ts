@@ -10,7 +10,8 @@ export function useWallet() {
     setError(null);
     try {
       // Dynamic import prevents issues if the extension isn't installed
-      const { isConnected, getAddress } = await import("@stellar/freighter-api");
+      const { isConnected, requestAccess } = await import("@stellar/freighter-api");
+
 
       // Timeout wrapper — Freighter calls can hang if the extension is missing
       const connected = await Promise.race([
@@ -24,7 +25,7 @@ export function useWallet() {
         throw new Error("Freighter not installed. Install the browser extension first.");
       }
 
-      const addressResult = await getAddress();
+      const addressResult = await requestAccess();
       if (addressResult.error) throw new Error(addressResult.error);
 
       setPublicKey(addressResult.address);
