@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { AuthView } from "./components/AuthView";
 import { OnboardingView } from "./components/OnboardingView";
 import { Sidebar, type AppView } from "./components/Sidebar";
@@ -124,18 +125,57 @@ export default function App() {
           flexDirection: "column",
           minWidth: 0,
           height: "100%",
+          position: "relative",
         }}
       >
-        {activeView === "chat" && <ChatView userName={userName ?? "there"} />}
-        {activeView === "contacts" && <ContactsView />}
-        {activeView === "history" && <HistoryView />}
-        {activeView === "voice" && (
-          <VoiceListeningView onCancel={() => setActiveView("chat")} />
-        )}
-        {activeView === "settings" && (
-          <FullSettingsView defaultTab="profile" />
-        )}
+        <AnimatePresence mode="wait">
+          {activeView === "chat" && (
+            <PageTransition key="chat">
+              <ChatView userName={userName ?? "there"} />
+            </PageTransition>
+          )}
+          {activeView === "contacts" && (
+            <PageTransition key="contacts">
+              <ContactsView />
+            </PageTransition>
+          )}
+          {activeView === "history" && (
+            <PageTransition key="history">
+              <HistoryView />
+            </PageTransition>
+          )}
+          {activeView === "voice" && (
+            <PageTransition key="voice">
+              <VoiceListeningView onCancel={() => setActiveView("chat")} />
+            </PageTransition>
+          )}
+          {activeView === "settings" && (
+            <PageTransition key="settings">
+              <FullSettingsView defaultTab="profile" />
+            </PageTransition>
+          )}
+        </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+/* ── Reusable Page Transition Wrapper ── */
+function PageTransition({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      style={{ 
+        height: "100%", 
+        width: "100%", 
+        display: "flex", 
+        flexDirection: "column" 
+      }}
+    >
+      {children}
+    </motion.div>
   );
 }
