@@ -99,55 +99,62 @@ export function ContactsView() {
           </div>
         </div>
 
-        {/* RIGHT PANE: Detail View 
-            Added position: "relative" here so the modal stays inside! 
-        */}
+        {/* RIGHT PANE: Detail View */}
         <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, backgroundColor: "var(--background)" }}>
           {filtered.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: 400, width: "100%" }}>
-              
-              <div style={{ width: 100, height: 100, borderRadius: "50%", background: selectedContact.avatarBg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, border: `2px solid ${selectedContact.tagBg}` }}>
-                <span style={{ color: selectedContact.avatarColor, fontSize: 36, fontWeight: 700 }}>{selectedContact.initials}</span>
-              </div>
-              
-              <h2 style={{ fontSize: 26, fontWeight: 700, margin: "0 0 4px 0", color: "var(--foreground)" }}>{selectedContact.name}</h2>
-              <p style={{ color: "var(--muted-foreground)", margin: "0 0 24px 0", fontSize: 15 }}>{selectedContact.handle}</p>
-
-              <div style={{ width: "100%", backgroundColor: "var(--card)", borderRadius: 16, padding: "20px", marginBottom: 32, border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20, alignItems: "center" }}>
-                  <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Group Tag</span>
-                  <span style={{ padding: "4px 12px", borderRadius: 20, background: selectedContact.tagBg, color: selectedContact.tagColor, fontSize: 12, fontWeight: 600 }}>{selectedContact.tag}</span>
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={selectedContact.id} /* This key tells framer-motion to animate when the contact changes! */
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: 400, width: "100%" }}
+              >
+                
+                <div style={{ width: 100, height: 100, borderRadius: "50%", background: selectedContact.avatarBg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, border: `2px solid ${selectedContact.tagBg}` }}>
+                  <span style={{ color: selectedContact.avatarColor, fontSize: 36, fontWeight: 700 }}>{selectedContact.initials}</span>
                 </div>
                 
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Stellar Address</span>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--muted)", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border)" }}>
-                    <span style={{ fontSize: 13, fontFamily: "monospace", color: "var(--foreground)" }}>
-                      {selectedContact.address.slice(0, 10)}...{selectedContact.address.slice(-8)}
-                    </span>
-                    <button onClick={() => copy(selectedContact.id, selectedContact.address)} style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex" }}>
-                      <Copy size={16} color={copied === selectedContact.id ? "#4ADE80" : "var(--muted-foreground)"} />
-                    </button>
+                <h2 style={{ fontSize: 26, fontWeight: 700, margin: "0 0 4px 0", color: "var(--foreground)" }}>{selectedContact.name}</h2>
+                <p style={{ color: "var(--muted-foreground)", margin: "0 0 24px 0", fontSize: 15 }}>{selectedContact.handle}</p>
+
+                <div style={{ width: "100%", backgroundColor: "var(--card)", borderRadius: 16, padding: "20px", marginBottom: 32, border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20, alignItems: "center" }}>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Group Tag</span>
+                    <span style={{ padding: "4px 12px", borderRadius: 20, background: selectedContact.tagBg, color: selectedContact.tagColor, fontSize: 12, fontWeight: 600 }}>{selectedContact.tag}</span>
+                  </div>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Stellar Address</span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--muted)", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border)" }}>
+                      <span style={{ fontSize: 13, fontFamily: "monospace", color: "var(--foreground)" }}>
+                        {selectedContact.address.slice(0, 10)}...{selectedContact.address.slice(-8)}
+                      </span>
+                      <button onClick={() => copy(selectedContact.id, selectedContact.address)} style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex" }}>
+                        <Copy size={16} color={copied === selectedContact.id ? "#4ADE80" : "var(--muted-foreground)"} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* ACTION BUTTONS */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
-                <button style={{ width: "100%", padding: "16px", borderRadius: 12, background: "#2563EB", border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")} onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}>
-                  <Send size={16} />
-                  Send Payment
-                </button>
+                {/* ACTION BUTTONS */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
+                  <button style={{ width: "100%", padding: "16px", borderRadius: 12, background: "#2563EB", border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")} onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}>
+                    <Send size={16} />
+                    Send Payment
+                  </button>
 
-                <button 
-                  onClick={() => setShowHistoryModal(true)}
-                  style={{ width: "100%", padding: "16px", borderRadius: 12, background: "var(--muted)", border: "1px solid var(--border)", color: "var(--foreground)", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} 
-                >
-                  <Clock size={16} />
-                  View History
-                </button>
-              </div>
-            </div>
+                  <button 
+                    onClick={() => setShowHistoryModal(true)}
+                    style={{ width: "100%", padding: "16px", borderRadius: 12, background: "var(--muted)", border: "1px solid var(--border)", color: "var(--foreground)", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} 
+                  >
+                    <Clock size={16} />
+                    View History
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           ) : (
              <div style={{ color: "var(--muted-foreground)", fontSize: 16 }}>No contact selected</div>
           )}
@@ -214,7 +221,7 @@ function ContactHistoryModal({ contactId, contactName, onClose }: { contactId: s
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         transition={{ duration: 0.2 }}
         style={{
-          position: "relative", /* Changed from absolute! Flexbox handles the centering now. */
+          position: "relative",
           background: "var(--card)", 
           width: "100%", 
           maxWidth: 500, 
