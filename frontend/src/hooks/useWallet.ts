@@ -38,7 +38,17 @@ export function useWallet() {
     }
   }, []);
 
+  const sign = useCallback(async (xdr: string, address: string): Promise<string> => {
+    const { signTransaction } = await import("@stellar/freighter-api");
+    const result = await signTransaction(xdr, {
+      networkPassphrase: "Test SDF Network ; September 2015",
+      address,
+    });
+    if (result.error) throw new Error(result.error as unknown as string);
+    return result.signedTxXdr;
+  }, []);
+
   const disconnect = useCallback(() => setPublicKey(null), []);
 
-  return { publicKey, connecting, error, connect, disconnect };
+  return { publicKey, connecting, error, connect, disconnect, sign };
 }

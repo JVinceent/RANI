@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { BASE_FEE } from "@stellar/stellar-sdk";
 import { supabase } from "../db";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
 import { buildPaymentXDR, submitSignedTransaction, pollTransaction } from "../lib/payment";
@@ -108,6 +109,8 @@ transactionsRouter.post("/build", async (req: AuthedRequest, res) => {
     memoText: parsed.data.memo,
   });
 
+  const feeXLM = (Number(BASE_FEE) / 10_000_000).toFixed(7);
+
   const { data: tx, error: txErr } = await supabase
     .from("transactions")
     .insert({
@@ -123,7 +126,7 @@ transactionsRouter.post("/build", async (req: AuthedRequest, res) => {
     .single();
 
   if (txErr) return res.status(500).json({ error: txErr.message });
-  res.json({ transactionId: tx.id, xdr });
+  res.json({ transactionId: tx.id, xdr, feeXLM });
 });
 
 const submitSchema = z.object({

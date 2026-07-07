@@ -101,7 +101,7 @@ export const buildTransaction = (data: {
   assetCode: string;
   assetIssuer?: string;
   memo?: string;
-}) => request<{ transactionId: string; xdr: string }>(
+}) => request<{ transactionId: string; xdr: string; feeXLM: string }>(
   "/transactions/build",
   { method: "POST", body: JSON.stringify(data) }
 );

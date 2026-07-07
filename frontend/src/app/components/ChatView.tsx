@@ -12,8 +12,8 @@ import confetti from "canvas-confetti";
 import { Header } from "./Header";
 import { SEP24Modal } from "./SEP24Modal";
 //import { buildTransaction, submitTransaction, getBalance, type Contact } from "../../lib/api";
-import { getBalance, addContact, parseCommand, type Contact } from "../../lib/api";
-
+import { getBalance, addContact, parseCommand, buildTransaction, submitTransaction, type Contact } from "../../lib/api";
+import { useWallet } from "../../hooks/useWallet";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -59,7 +59,14 @@ type ChatMessage = {
 ═══════════════════════════════════════════════════════════════════ */
 
 export function ChatView({ userName }: { userName: string }) {
+  const { publicKey, sign } = useWallet();
   const [state, setState] = useState<ChatState>("landing");
+  const [feeXLM, setFeeXLM] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [builtTx, setBuiltTx] = useState<{ transactionId: string; xdr: string } | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -69,6 +76,7 @@ export function ChatView({ userName }: { userName: string }) {
   const [amount, setAmount] = useState<string | null>(null);
   const [balance, setBalance] = useState<Balance | null>(null);
   const [notFoundName, setNotFoundName] = useState<string | null>(null);
+  const [memo, setMemo] = useState<string | null>(null);
   const [addingContactName, setAddingContactName] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -83,36 +91,84 @@ export function ChatView({ userName }: { userName: string }) {
     setCandidates(null);
     setResolvedContact(null);
     setAmount(null);
+    setMemo(null);
     setNotFoundName(null);
     setAddingContactName(null);
     setMessages([]);
     go("landing");
   };
 
-  const handleConfirm = () => {
-    setState("success");
-    confetti({
-      particleCount: 220,
-      spread: 105,
-      origin: { y: 0.52 },
-      colors: ["#2563EB", "#60A5FA", "#22C55E", "#4ADE80", "#F0F6FF", "#FCD34D"],
-    });
-    setTimeout(() => {
-      confetti({
-        particleCount: 90,
-        spread: 65,
-        angle: 60,
-        origin: { x: 0.1, y: 0.45 },
-        colors: ["#2563EB", "#93C5FD"],
+  const prepareConfirm = async () => {
+    setConfirmError(null);
+    setFeeXLM(null);
+    setBuiltTx(null);
+
+    if (!resolvedContact || !amount) return;
+
+    console.log("prepareConfirm called", { resolvedContact, amount });
+    setPreparing(true);
+    try {
+      const built = await buildTransaction({
+        contactId: resolvedContact.id,
+        amount,
+        assetCode: "XLM",
+        memo: memo ?? undefined,
       });
-      confetti({
-        particleCount: 90,
-        spread: 65,
-        angle: 120,
-        origin: { x: 0.9, y: 0.45 },
-        colors: ["#22C55E", "#4ADE80"],
+      setBuiltTx({ transactionId: built.transactionId, xdr: built.xdr });
+      setFeeXLM(built.feeXLM);
+    } catch (e: any) {
+      setConfirmError(e.message ?? "Could not prepare this payment.");
+    } finally {
+      setPreparing(false);
+    }
+    go("confirm");
+  };
+
+  const handleConfirm = async () => {
+    if (!builtTx || !publicKey) {
+      setConfirmError("Payment isn't ready yet.");
+      return;
+    }
+    setConfirming(true);
+    setConfirmError(null);
+
+    try {
+      const signedXdr = await sign(builtTx.xdr, publicKey);
+
+      const result = await submitTransaction({
+        transactionId: builtTx.transactionId,
+        signedXdr,
       });
-    }, 280);
+
+      setTxHash(result.stellarTxHash);
+      setState("success");
+      confetti({
+        particleCount: 220,
+        spread: 105,
+        origin: { y: 0.52 },
+        colors: ["#2563EB", "#60A5FA", "#22C55E", "#4ADE80", "#F0F6FF", "#FCD34D"],
+      });
+      setTimeout(() => {
+        confetti({
+          particleCount: 90,
+          spread: 65,
+          angle: 60,
+          origin: { x: 0.1, y: 0.45 },
+          colors: ["#2563EB", "#93C5FD"],
+        });
+        confetti({
+          particleCount: 90,
+          spread: 65,
+          angle: 120,
+          origin: { x: 0.9, y: 0.45 },
+          colors: ["#22C55E", "#4ADE80"],
+        });
+      }, 280);
+    } catch (e: any) {
+      setConfirmError(e.message ?? "Payment failed. Please try again.");
+    } finally {
+      setConfirming(false);
+    }
   };
 
   const handleSend = async () => {
@@ -257,6 +313,7 @@ if (awaiting === "amount") {
       if (result.resolvedContact && result.amount) {
         setResolvedContact(result.resolvedContact);
         setAmount(result.amount);
+        setMemo(result.memo ?? null);
         try {
           const bal = await getBalance();
           setBalance(bal);
@@ -370,8 +427,9 @@ if (awaiting === "amount") {
                 resolvedContact={resolvedContact}
                 amount={amount}
                 balance={balance}
+                txHash={txHash}
                 onSelectCandidate={handleSelectCandidate}
-                onReviewSend={() => go("confirm")}
+                onReviewSend={prepareConfirm}
                 onReset={resetFlow}
                 onTryAgain={handleTryAgain}
                 onAddContact={handleAddContact}
@@ -406,6 +464,13 @@ if (awaiting === "amount") {
                 transition={{ duration: 0.22, ease: "easeOut" }}
               >
                 <ConfirmModal
+                  recipient={resolvedContact!}
+                  amount={amount!}
+                  memo={memo}  
+                  feeXLM={feeXLM}
+                  confirming={confirming}
+                  preparing={preparing}
+                  error={confirmError}
                   onConfirm={handleConfirm}
                   onCancel={() => go("summary")}
                 />
@@ -702,6 +767,7 @@ function ChatThread({
   resolvedContact,
   amount,
   balance,
+  txHash,
   onSelectCandidate,
   onReviewSend,
   onReset,
@@ -715,6 +781,7 @@ function ChatThread({
   resolvedContact: Contact | null;
   amount: string | null;
   balance: { xlm: string; usdc: string } | null;
+  txHash: string | null;
   onSelectCandidate: (c: Contact) => void;
   onReviewSend: () => void;
   onReset: () => void;
@@ -808,7 +875,8 @@ function ChatThread({
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
               >
-                <SuccessBlock onReset={onReset} />
+                <SuccessBlock onReset={onReset} txHash={txHash} />
+
               </motion.div>
             )}
           </AnimatePresence>
@@ -1153,13 +1221,33 @@ function SummaryBlock({
 ═══════════════════════════════════════════════════════════════════ */
 
 function ConfirmModal({
+  recipient,
+  amount,
+  memo,
+  feeXLM,
+  confirming,
+  preparing,
+  error,
   onConfirm,
   onCancel,
 }: {
+  recipient: Contact;
+  amount: string;
+  memo: string | null;
+  feeXLM: string | null;
+  confirming: boolean;
+  preparing: boolean;
+  error: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
   const [hover, setHover] = useState(false);
+  const initials = recipient.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div
@@ -1278,7 +1366,7 @@ function ConfirmModal({
                 lineHeight: 1,
               }}
             >
-              ₱500.00
+              ₱{amount}
             </div>
           </div>
           <ArrowRight size={20} color="#2A3F5C" />
@@ -1312,9 +1400,9 @@ function ConfirmModal({
         </div>
 
         {[
-          { label: "Recipient", value: "Maria Dela Cruz", sub: "GBXYZ...4A2M" },
-          { label: "Network Fee", value: "₱0.0004", sub: "≈ 0.000069 XLM" },
-          { label: "Memo", value: "dinner", sub: null },
+          { label: "Recipient", value: recipient.name, sub: `${recipient.address.slice(0, 6)}...${recipient.address.slice(-4)}` },
+          { label: "Network Fee", value: feeXLM ? `${feeXLM} XLM` : preparing ? "calculating..." : "—", sub: null },
+          { label: "Memo", value: memo ?? "—", sub: null },
           { label: "Est. Arrival", value: "< 5 seconds", sub: "Stellar network" },
         ].map(({ label, value, sub }, i, arr) => (
           <div
@@ -1390,18 +1478,24 @@ function ConfirmModal({
           </p>
         </div>
 
+        {error && (
+          <div style={{ color: "#F87171", fontSize: 12, fontFamily: FF, marginBottom: 8, textAlign: "center" }}>
+            {error}
+          </div>
+        )}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <button
             onClick={onConfirm}
+            disabled={confirming}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
             style={{
               width: "100%",
               padding: "13px 0",
               borderRadius: 11,
-              background: hover ? "#1D4ED8" : "#2563EB",
+              background: confirming ? "rgba(37,99,235,0.5)" : hover ? "#1D4ED8" : "#2563EB",
               border: "none",
-              cursor: "pointer",
+              cursor: confirming ? "not-allowed" : "pointer",
               color: "#fff",
               fontSize: 14,
               fontWeight: 600,
@@ -1414,7 +1508,7 @@ function ConfirmModal({
             }}
           >
             <Lock size={14} color="rgba(255,255,255,0.7)" />
-            Confirm Payment
+            {confirming ? "Confirming..." : "Confirm Payment"}
           </button>
           <button
             onClick={onCancel}
@@ -1444,7 +1538,7 @@ function ConfirmModal({
    STATE 5 — SUCCESS RECEIPT
 ═══════════════════════════════════════════════════════════════════ */
 
-function SuccessBlock({ onReset }: { onReset: () => void }) {
+function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string | null }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <AIChatBubble>🎉 Payment sent successfully! Here's your receipt:</AIChatBubble>
@@ -1594,11 +1688,8 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
             }}
           >
             {[
-              { label: "To", value: "Maria Dela Cruz", mono: false },
-              { label: "Memo", value: "dinner", mono: false },
-              { label: "Network", value: "Stellar (USDC)", mono: false },
-              { label: "Fee", value: "₱0.0004", mono: false },
-              { label: "TX Hash", value: "a1b2c3...f8e9", mono: true },
+              { label: "Network", value: "Stellar (XLM)", mono: false },
+              { label: "TX Hash", value: txHash ? `${txHash.slice(0, 8)}...${txHash.slice(-6)}` : "—", mono: true },
             ].map(({ label, value, mono }) => (
               <div
                 key={label}
@@ -1632,7 +1723,9 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
           </div>
 
           <a
-            href="#"
+            href={txHash ? `https://stellar.expert/explorer/testnet/tx/${txHash}` : "#"}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: "flex",
               alignItems: "center",
