@@ -8,7 +8,7 @@ import { HistoryView } from "./components/HistoryView";
 import { VoiceListeningView } from "./components/VoiceListeningView";
 import { FullSettingsView } from "./components/FullSettingsView";
 import { useWallet } from "../hooks/useWallet";
-import { connectFreighter } from "../lib/api";
+import { connectFreighter, saveName } from "../lib/api";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -36,16 +36,14 @@ export default function App() {
         walletPublicKey = `demo-wallet-${fallbackId}`;
       }
 
-      // MVP simplification: derive a stable pseudo-email from the wallet
-      // address so we don't need a separate signup step for the demo.
-      // Replace with a real email/identity flow before shipping.
       const data = await connectFreighter(`${walletPublicKey.slice(0, 12).toLowerCase()}@rani.local`, walletPublicKey);
+
       if (data.name) {
-          setUserName(data.name);
-          setScreen("main");        // skip onboarding entirely
-        } else {
-          setScreen("onboarding");  // first time — ask for name
-        }
+        setUserName(data.name);
+        setScreen("main");
+      } else {
+        setScreen("onboarding");
+      }
     } catch (e: any) {
       setAuthError(e.message ?? "Could not reach the backend.");
     }
@@ -72,7 +70,19 @@ export default function App() {
 
   /* ── Onboarding frame ── */
   if (screen === "onboarding") {
-    return <OnboardingView onContinue={() => setScreen("main")} />;
+    return (
+      <OnboardingView
+        onContinue={async (name) => {
+          try {
+            await saveName(name);
+          } catch {
+            // non-fatal — proceed even if saving the name fails
+          }
+          setUserName(name);
+          setScreen("main");
+        }}
+      />
+    );
   }
 
   /* ── Main app ── */
@@ -98,7 +108,7 @@ export default function App() {
           height: "100%",
         }}
       >
-        {activeView === "chat" && <ChatView />}
+        {activeView === "chat" && <ChatView userName={userName ?? "there"} />}
         {activeView === "contacts" && <ContactsView />}
         {activeView === "history" && <HistoryView />}
         {activeView === "voice" && (

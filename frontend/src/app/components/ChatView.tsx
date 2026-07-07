@@ -58,7 +58,7 @@ type ChatMessage = {
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
 
-export function ChatView() {
+export function ChatView({ userName }: { userName: string }) {
   const [state, setState] = useState<ChatState>("landing");
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -317,6 +317,7 @@ if (awaiting === "amount") {
               style={{ height: "100%" }}
             >
               <LandingState
+                userName={userName}
                 onSendMoney={() => {
                   addMessage("user", "Send Money");
                   addMessage("assistant", "Sure — who would you like to send to?");
@@ -508,10 +509,12 @@ if (awaiting === "amount") {
 ═══════════════════════════════════════════════════════════════════ */
 
 function LandingState({
+  userName,
   onSendMoney,
   onCashIn,
   onCheckBalance,
 }: {
+  userName: string;
   onSendMoney: () => void;
   onCashIn: () => void;
   onCheckBalance: () => void;
@@ -577,7 +580,7 @@ function LandingState({
             lineHeight: 1.1,
           }}
         >
-          Hey, Regina 👋
+          Hey, {userName} 👋
         </div>
         <div
           style={{

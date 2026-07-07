@@ -36,6 +36,13 @@ export async function connectFreighter(email: string, publicKey: string) {
   return data;
 }
 
+export async function saveName(name: string) {
+  return request<{ name: string }>("/auth/name", {
+    method: "PATCH",
+    body: JSON.stringify({ name }),
+  });
+}
+
 export function logout() {
   localStorage.removeItem("rani_token");
 }
