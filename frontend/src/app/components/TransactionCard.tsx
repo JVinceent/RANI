@@ -29,11 +29,11 @@ export function TransactionCard({
           style={{
             borderRadius: 16,
             overflow: "hidden",
-            background: "#0C1929",
+            background: "var(--card)",
             border:
               state === "success"
                 ? "1px solid rgba(34,197,94,0.22)"
-                : "1px solid rgba(255,255,255,0.07)",
+                : "1px solid var(--border)",
             boxShadow:
               state === "success" ? "0 0 40px rgba(34,197,94,0.08)" : "none",
           }}
@@ -66,7 +66,7 @@ export function TransactionCard({
                     ? s === "success"
                       ? "#22C55E"
                       : "#2563EB"
-                    : "rgba(255,255,255,0.1)",
+                    : "var(--border)",
               }}
               transition={{ duration: 0.25 }}
               style={{ height: 6, borderRadius: 3 }}
@@ -108,7 +108,7 @@ function ProcessingState() {
       <div>
         <div
           style={{
-            color: "#7B92B0",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             fontFamily: FF,
             marginBottom: 10,
@@ -163,7 +163,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
         <div>
           <div
             style={{
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 10,
               fontFamily: FF,
               fontWeight: 600,
@@ -176,7 +176,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
           </div>
           <div
             style={{
-              color: "#F0F6FF",
+              color: "var(--foreground)",
               fontSize: 28,
               fontWeight: 700,
               fontFamily: FF,
@@ -188,7 +188,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
           </div>
           <div
             style={{
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 11,
               fontFamily: FF,
               marginTop: 3,
@@ -216,7 +216,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
       <div
         style={{
           height: 1,
-          background: "rgba(255,255,255,0.06)",
+          background: "var(--border)",
           marginBottom: 16,
         }}
       />
@@ -233,7 +233,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
         <div>
           <div
             style={{
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 10,
               fontFamily: FF,
               fontWeight: 600,
@@ -246,7 +246,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
           </div>
           <div
             style={{
-              color: "#E2EEFF",
+              color: "var(--foreground)",
               fontSize: 15,
               fontWeight: 600,
               fontFamily: FF,
@@ -256,7 +256,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
           </div>
           <div
             style={{
-              color: "#2A3F5C",
+              color: "var(--muted-foreground)",
               fontSize: 11,
               fontFamily: "monospace",
               marginTop: 2,
@@ -268,7 +268,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
         <div style={{ textAlign: "right" }}>
           <div
             style={{
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 10,
               fontFamily: FF,
               fontWeight: 600,
@@ -293,7 +293,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
           </div>
           <div
             style={{
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 11,
               fontFamily: FF,
               marginTop: 2,
@@ -315,7 +315,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
           background: hover ? "#1D4ED8" : "#2563EB",
           border: "none",
           cursor: "pointer",
-          color: "#fff",
+          color: "var(--foreground)",
           fontSize: 14,
           fontWeight: 600,
           fontFamily: FF,
@@ -327,7 +327,7 @@ function SummaryState({ onReviewSend }: { onReviewSend: () => void }) {
         }}
       >
         Review & Send
-        <ArrowRight size={15} color="#fff" />
+        <ArrowRight size={15} color="var(--foreground)" />
       </button>
     </div>
   );
@@ -376,7 +376,7 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
           </div>
           <div
             style={{
-              color: "#4A6080",
+              color: "var(--muted-foreground)",
               fontSize: 12,
               fontFamily: FF,
               marginTop: 1,
@@ -400,7 +400,7 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
           <div>
             <div
               style={{
-                color: "#3A5070",
+                color: "var(--muted-foreground)",
                 fontSize: 9,
                 fontFamily: FF,
                 fontWeight: 700,
@@ -413,7 +413,7 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
             </div>
             <div
               style={{
-                color: "#F0F6FF",
+                color: "var(--foreground)",
                 fontSize: 22,
                 fontWeight: 700,
                 fontFamily: FF,
@@ -428,7 +428,7 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
           <div style={{ textAlign: "right" }}>
             <div
               style={{
-                color: "#3A5070",
+                color: "var(--muted-foreground)",
                 fontSize: 9,
                 fontFamily: FF,
                 fontWeight: 700,
@@ -457,7 +457,7 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
         <div
           style={{
             height: 1,
-            background: "rgba(255,255,255,0.06)",
+            background: "var(--border)",
             marginBottom: 14,
           }}
         />
@@ -486,19 +486,19 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
                 alignItems: "center",
               }}
             >
-              <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
                 {label}
               </span>
               <span
                 style={{
-                  color: "#E2EEFF",
+                  color: "var(--foreground)",
                   fontSize: 12,
                   fontWeight: 500,
                   fontFamily: mono ? "monospace" : FF,
-                  background: mono ? "rgba(255,255,255,0.05)" : "transparent",
+                  background: mono ? "var(--muted)" : "transparent",
                   padding: mono ? "2px 8px" : 0,
                   borderRadius: mono ? 5 : 0,
-                  border: mono ? "1px solid rgba(255,255,255,0.06)" : "none",
+                  border: mono ? "1px solid var(--border)" : "none",
                 }}
               >
                 {value}
@@ -545,16 +545,16 @@ function SuccessState({ onReset }: { onReset?: () => void }) {
               background: "transparent",
               border: "none",
               cursor: "pointer",
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 12,
               fontFamily: FF,
               transition: "color 150ms",
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.color = "#7B92B0")
+              (e.currentTarget.style.color = "var(--foreground)")
             }
             onMouseLeave={(e) =>
-              (e.currentTarget.style.color = "#3A5070")
+              (e.currentTarget.style.color = "var(--muted-foreground)")
             }
           >
             ↩ Try another transaction

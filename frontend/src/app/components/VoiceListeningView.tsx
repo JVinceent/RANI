@@ -27,7 +27,8 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#080E1C",
+        background: "var(--background)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <Header />
@@ -65,7 +66,7 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
               width: 72,
               height: 72,
               borderRadius: "50%",
-              background: "#080E1C",
+              background: "var(--background)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -78,7 +79,7 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
         <div style={{ textAlign: "center" }}>
           <div
             style={{
-              color: "#F0F6FF",
+              color: "var(--foreground)",
               fontSize: 34,
               fontWeight: 700,
               fontFamily: FF,
@@ -90,7 +91,7 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
             Hey, Regina 👋
           </div>
           <div
-            style={{ color: "#4A6080", fontSize: 15, fontFamily: FF }}
+            style={{ color: "var(--muted-foreground)", fontSize: 15, fontFamily: FF }}
           >
             Type a payment in plain language to get started.
           </div>
@@ -117,8 +118,8 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
   return (
     <div
       style={{
-        background: "#06090F",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--card)",
+        borderTop: "1px solid var(--border)",
         padding: "22px 40px 30px",
         display: "flex",
         flexDirection: "column",
@@ -174,7 +175,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
       >
         <span
           style={{
-            color: "rgba(240,246,255,0.82)",
+            color: "var(--foreground)",
             fontSize: 30,
             fontWeight: 400,
             fontFamily: FF,
@@ -200,7 +201,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
         </motion.span>
         <span
           style={{
-            color: "rgba(240,246,255,0.82)",
+            color: "var(--foreground)",
             fontSize: 30,
             fontWeight: 400,
             fontFamily: FF,
@@ -282,20 +283,20 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
             gap: 8,
             padding: "10px 24px",
             borderRadius: 50,
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--muted)",
+            border: "1px solid var(--border)",
             cursor: "pointer",
-            color: "#7B92B0",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             fontFamily: FF,
             fontWeight: 500,
             transition: "background 150ms",
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+            (e.currentTarget.style.background = "var(--border)")
           }
           onMouseLeave={(e) =>
-            (e.currentTarget.style.background = "rgba(255,255,255,0.06)")
+            (e.currentTarget.style.background = "var(--muted)")
           }
         >
           <X size={14} color="#7B92B0" />
@@ -351,8 +352,8 @@ function GhostPill({
         gap: 7,
         padding: "10px 20px",
         borderRadius: 50,
-        border: "1.5px solid rgba(255,255,255,0.1)",
-        color: "#7B92B0",
+        border: "1.5px solid var(--border)",
+        color: "var(--muted-foreground)",
         fontSize: 14,
         fontFamily: FF,
         fontWeight: 600,

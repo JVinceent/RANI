@@ -66,8 +66,8 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
         style={{
           width: 484,
           borderRadius: 22,
-          background: "#0D1929",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           boxShadow:
             "0 40px 90px rgba(0,0,0,0.68), 0 0 0 1px rgba(37,99,235,0.07)",
           overflow: "hidden",
@@ -80,7 +80,7 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "20px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -101,7 +101,7 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
             <div>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 16,
                   fontWeight: 600,
                   fontFamily: FF,
@@ -111,7 +111,7 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
               </div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 12,
                   fontFamily: FF,
                   marginTop: 2,
@@ -128,22 +128,22 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
               width: 30,
               height: 30,
               borderRadius: 9,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "var(--muted)",
+              border: "1px solid var(--border)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               transition: "background 150ms",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--border)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "var(--muted)";
+            }}
           >
-            <X size={14} color="#4A6080" />
+            <X size={14} color="var(--muted-foreground)" />
           </button>
         </div>
 
@@ -195,14 +195,14 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
                 fontSize: 13,
                 color:
                   address.length > 0 && !address.startsWith("G")
-                    ? "#F87171"
-                    : "#F0F6FF",
+                    ? "#F87171" // This is a specific error color, leaving as is.
+                    : "var(--foreground)",
                 borderColor:
                   address.length > 0 && !address.startsWith("G")
-                    ? "rgba(248,113,113,0.45)"
+                    ? "rgba(248,113,113,0.45)" // This is a specific error color, leaving as is.
                     : focused === "address"
                     ? "rgba(37,99,235,0.5)"
-                    : "rgba(255,255,255,0.1)",
+                    : "var(--border)",
               }}
             />
           </FieldGroup>
@@ -247,7 +247,7 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
             display: "flex",
             gap: 10,
             padding: "16px 24px 22px",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
+            borderTop: "1px solid var(--border)",
           }}
         >
           {/* Cancel */}
@@ -259,12 +259,10 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
               flex: 1,
               padding: "12px 0",
               borderRadius: 12,
-              background: hoverCancel
-                ? "rgba(255,255,255,0.06)"
-                : "transparent",
-              border: "1.5px solid rgba(255,255,255,0.1)",
+              background: hoverCancel ? "var(--muted)" : "transparent",
+              border: "1.5px solid var(--border)",
               cursor: "pointer",
-              color: "#7B92B0",
+              color: "var(--muted-foreground)",
               fontSize: 14,
               fontWeight: 500,
               fontFamily: FF,
@@ -291,7 +289,7 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
                 : "#2563EB",
               border: "none",
               cursor: isValid ? "pointer" : "not-allowed",
-              color: "#fff",
+              color: "var(--foreground)",
               fontSize: 14,
               fontWeight: 600,
               fontFamily: FF,
@@ -303,7 +301,7 @@ export function AddContactModal({ onClose, onSave }: AddContactModalProps) {
               gap: 8,
             }}
           >
-            <UserPlus size={15} color="#fff" />
+            <UserPlus size={15} color="var(--foreground)" />
             Save Contact
           </button>
         </div>
@@ -339,7 +337,7 @@ function FieldGroup({
       >
         <label
           style={{
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 11,
             fontFamily: FF,
             fontWeight: 700,
@@ -364,13 +362,13 @@ function inputStyle(focused: boolean): React.CSSProperties {
   return {
     width: "100%",
     outline: "none",
-    background: "rgba(255,255,255,0.04)",
+    background: "var(--muted)",
     border: `1.5px solid ${
-      focused ? "rgba(37,99,235,0.5)" : "rgba(255,255,255,0.1)"
+      focused ? "rgba(37,99,235,0.5)" : "var(--border)"
     }`,
     borderRadius: 12,
     padding: "13px 16px",
-    color: "#F0F6FF",
+    color: "var(--foreground)",
     fontSize: 14,
     fontFamily: "'DM Sans', sans-serif",
     boxSizing: "border-box" as const,

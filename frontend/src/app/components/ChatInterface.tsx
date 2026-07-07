@@ -11,7 +11,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState("");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#070F1C" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--background)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
       {/* Header */}
       <div
         style={{
@@ -19,7 +19,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "16px 32px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--border)",
           flexShrink: 0,
         }}
       >
@@ -39,10 +39,10 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
             <Sparkles size={15} color="#60A5FA" />
           </div>
           <div>
-            <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Rani AI</div>
+            <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Rani AI</div>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 1 }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#22C55E" }} />
-              <span style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>Online</span>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>Online</span>
             </div>
           </div>
         </div>
@@ -75,11 +75,11 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
       >
         {/* Date separator */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-          <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF, fontWeight: 500, whiteSpace: "nowrap" }}>
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+          <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, fontWeight: 500, whiteSpace: "nowrap" }}>
             Today, July 4
           </span>
-          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
         </div>
 
         {/* User message */}
@@ -92,7 +92,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
               maxWidth: 400,
             }}
           >
-            <p style={{ color: "#fff", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
+            <p style={{ color: "var(--foreground)", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
               Send P500 to Maria for dinner
             </p>
             <div style={{ textAlign: "right", marginTop: 4 }}>
@@ -119,7 +119,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
             <Sparkles size={14} color="#60A5FA" />
           </div>
           <div style={{ flex: 1, maxWidth: 600 }}>
-            <p style={{ color: "#7B92B0", fontSize: 14, fontFamily: FF, marginBottom: 12, lineHeight: 1.6 }}>
+            <p style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: FF, marginBottom: 12, lineHeight: 1.6 }}>
               Sure! I found Maria Santos in your contacts. Here's a summary before we proceed:
             </p>
 
@@ -128,20 +128,20 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
               style={{
                 borderRadius: 16,
                 padding: 20,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "var(--muted)",
+                border: "1px solid var(--border)",
               }}
             >
               {/* Balance */}
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
                 <div>
-                  <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
                     Wallet Balance
                   </div>
-                  <div style={{ color: "#F0F6FF", fontSize: 26, fontWeight: 700, fontFamily: FF, lineHeight: 1, letterSpacing: "-0.01em" }}>
+                  <div style={{ color: "var(--foreground)", fontSize: 26, fontWeight: 700, fontFamily: FF, lineHeight: 1, letterSpacing: "-0.01em" }}>
                     ₱ 4,850.00
                   </div>
-                  <div style={{ color: "#4A6080", fontSize: 11, fontFamily: FF, marginTop: 2 }}>≈ 588.6 USDC</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, marginTop: 2 }}>≈ 588.6 USDC</div>
                 </div>
                 <div
                   style={{
@@ -159,25 +159,25 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
                 </div>
               </div>
 
-              <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginBottom: 16 }} />
+              <div style={{ height: 1, background: "var(--border)", marginBottom: 16 }} />
 
               {/* Transfer details */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
                 <div>
-                  <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
                     Sending To
                   </div>
-                  <div style={{ color: "#E2EEFF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Maria Santos</div>
-                  <div style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF, marginTop: 1 }}>GBXYZ...4A2M</div>
+                  <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Maria Santos</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, marginTop: 1 }}>GBXYZ...4A2M</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
                     Amount
                   </div>
                   <div style={{ color: "#60A5FA", fontSize: 22, fontWeight: 700, fontFamily: FF, letterSpacing: "-0.01em" }}>
                     ₱ 500.00
                   </div>
-                  <div style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>≈ 8.5 USDC</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>≈ 8.5 USDC</div>
                 </div>
               </div>
 
@@ -192,7 +192,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
                     background: "#2563EB",
                     border: "none",
                     cursor: "pointer",
-                    color: "#fff",
+                    color: "var(--foreground)",
                     fontSize: 13,
                     fontWeight: 600,
                     fontFamily: FF,
@@ -206,9 +206,9 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
                     padding: "10px 16px",
                     borderRadius: 10,
                     background: "transparent",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: "1px solid var(--border)",
                     cursor: "pointer",
-                    color: "#4A6080",
+                    color: "var(--muted-foreground)",
                     fontSize: 13,
                     fontWeight: 500,
                     fontFamily: FF,
@@ -220,7 +220,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
             </div>
 
             <div style={{ marginTop: 4, marginLeft: 2 }}>
-              <span style={{ color: "#1E3050", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
       <div
         style={{
           padding: "16px 32px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--border)",
           flexShrink: 0,
         }}
       >
@@ -241,8 +241,8 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
             gap: 10,
             borderRadius: 12,
             padding: "10px 14px",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(37,99,235,0.18)",
+            background: "var(--muted)",
+            border: "1px solid var(--border)",
           }}
         >
           <input
@@ -255,7 +255,7 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
               outline: "none",
               background: "transparent",
               border: "none",
-              color: "#E2EEFF",
+              color: "var(--foreground)",
               fontSize: 14,
               fontFamily: FF,
             }}
@@ -289,11 +289,11 @@ export function ChatInterface({ onConfirm }: ChatInterfaceProps) {
                 justifyContent: "center",
               }}
             >
-              <Send size={14} color="#fff" />
+              <Send size={14} color="var(--foreground)" />
             </button>
           </div>
         </div>
-        <p style={{ textAlign: "center", marginTop: 8, color: "#1A2B40", fontSize: 11, fontFamily: FF }}>
+        <p style={{ textAlign: "center", marginTop: 8, color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>
           Rani uses Stellar · Transactions are irreversible
         </p>
       </div>

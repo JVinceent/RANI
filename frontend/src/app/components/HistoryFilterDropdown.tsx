@@ -66,8 +66,8 @@ export function HistoryFilterDropdown({
         width: 268,
         zIndex: 40,
         borderRadius: 16,
-        background: "rgba(9, 19, 38, 0.98)",
-        border: "1px solid rgba(255,255,255,0.09)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         backdropFilter: "blur(28px)",
         WebkitBackdropFilter: "blur(28px)",
         boxShadow:
@@ -82,12 +82,12 @@ export function HistoryFilterDropdown({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "13px 16px 10px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         <span
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 13,
             fontWeight: 600,
             fontFamily: FF,
@@ -102,14 +102,14 @@ export function HistoryFilterDropdown({
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 11,
               fontFamily: FF,
               padding: 0,
               transition: "color 150ms",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
           >
             Reset
           </button>
@@ -188,7 +188,7 @@ export function HistoryFilterDropdown({
             background: "#2563EB",
             border: "none",
             cursor: "pointer",
-            color: "#fff",
+            color: "var(--foreground)",
             fontSize: 13,
             fontWeight: 600,
             fontFamily: FF,
@@ -224,7 +224,7 @@ function FilterSection({
     <div style={{ padding: "10px 16px" }}>
       <div
         style={{
-          color: "#3A5070",
+          color: "var(--muted-foreground)",
           fontSize: 10,
           fontFamily: FF,
           fontWeight: 700,
@@ -269,7 +269,7 @@ function FilterCheckbox({
         width: "100%",
         padding: "7px 8px",
         borderRadius: 8,
-        background: hover ? "rgba(255,255,255,0.04)" : "transparent",
+        background: hover ? "var(--muted)" : "transparent",
         border: "none",
         cursor: "pointer",
         textAlign: "left",
@@ -282,10 +282,10 @@ function FilterCheckbox({
           width: 17,
           height: 17,
           borderRadius: 5,
-          background: checked ? "#2563EB" : "rgba(255,255,255,0.06)",
+          background: checked ? "#2563EB" : "var(--muted)",
           border: checked
             ? "none"
-            : "1.5px solid rgba(255,255,255,0.16)",
+            : "1.5px solid var(--border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -293,13 +293,13 @@ function FilterCheckbox({
           transition: "background 150ms, border 150ms",
         }}
       >
-        {checked && <Check size={10} color="#fff" strokeWidth={3} />}
+        {checked && <Check size={10} color="var(--foreground)" strokeWidth={3} />}
       </div>
 
       {/* Label */}
       <span
         style={{
-          color: checked ? "#E2EEFF" : "#7B92B0",
+          color: checked ? "var(--foreground)" : "var(--muted-foreground)",
           fontSize: 13,
           fontFamily: FF,
           fontWeight: checked ? 500 : 400,
@@ -313,7 +313,7 @@ function FilterCheckbox({
       {/* Optional hint */}
       {hint && (
         <span
-          style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}
+          style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}
         >
           {hint}
         </span>
@@ -327,7 +327,7 @@ function SectionDivider() {
     <div
       style={{
         height: 1,
-        background: "rgba(255,255,255,0.05)",
+        background: "var(--border)",
         margin: "0 14px",
       }}
     />

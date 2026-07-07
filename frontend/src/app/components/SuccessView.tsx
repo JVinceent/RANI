@@ -4,14 +4,14 @@ const FF = "'DM Sans', sans-serif";
 
 export function SuccessView() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#070F1C" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--background)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
       {/* Header */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           padding: "16px 32px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--border)",
           flexShrink: 0,
         }}
       >
@@ -27,10 +27,10 @@ export function SuccessView() {
             <CheckCircle size={15} color="#4ADE80" strokeWidth={2} />
           </div>
           <div>
-            <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Rani AI</div>
+            <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Rani AI</div>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 1 }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#22C55E" }} />
-              <span style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>Payment completed</span>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>Payment completed</span>
             </div>
           </div>
         </div>
@@ -46,9 +46,9 @@ export function SuccessView() {
       >
         {/* Date separator */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-          <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF, fontWeight: 500, whiteSpace: "nowrap" }}>Today, July 4</span>
-          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+          <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, fontWeight: 500, whiteSpace: "nowrap" }}>Today, July 4</span>
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
         </div>
 
         {/* User message */}
@@ -61,7 +61,7 @@ export function SuccessView() {
               maxWidth: 360,
             }}
           >
-            <p style={{ color: "#fff", fontSize: 14, fontFamily: FF, margin: 0 }}>Send P500 to Maria for dinner</p>
+            <p style={{ color: "var(--foreground)", fontSize: 14, fontFamily: FF, margin: 0 }}>Send P500 to Maria for dinner</p>
             <div style={{ textAlign: "right", marginTop: 4 }}>
               <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
             </div>
@@ -86,8 +86,8 @@ export function SuccessView() {
               style={{
                 borderRadius: 16,
                 overflow: "hidden",
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(34,197,94,0.15)",
+                background: "var(--muted)",
+                border: "1px solid rgba(34,197,94,0.15)", // Accent color
               }}
             >
               {/* Success banner */}
@@ -113,9 +113,9 @@ export function SuccessView() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ color: "#4ADE80", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Payment Successful</div>
-                  <div style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>Confirmed on Stellar</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>Confirmed on Stellar</div>
                 </div>
-                <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
+                <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
               </div>
 
               {/* Receipt body */}
@@ -123,16 +123,16 @@ export function SuccessView() {
                 {/* Amounts */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                   <div>
-                    <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
                       Amount Sent
                     </div>
-                    <div style={{ color: "#F0F6FF", fontSize: 24, fontWeight: 700, fontFamily: FF, lineHeight: 1, letterSpacing: "-0.01em" }}>
+                    <div style={{ color: "var(--foreground)", fontSize: 24, fontWeight: 700, fontFamily: FF, lineHeight: 1, letterSpacing: "-0.01em" }}>
                       ₱500.00
                     </div>
                   </div>
                   <ArrowUpRight size={24} color="#4ADE80" strokeWidth={2} />
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 3 }}>
                       Received
                     </div>
                     <div style={{ color: "#4ADE80", fontSize: 24, fontWeight: 700, fontFamily: FF, lineHeight: 1, letterSpacing: "-0.01em" }}>
@@ -141,7 +141,7 @@ export function SuccessView() {
                   </div>
                 </div>
 
-                <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginBottom: 14 }} />
+                <div style={{ height: 1, background: "var(--border)", marginBottom: 14 }} />
 
                 {/* Details */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
@@ -153,17 +153,17 @@ export function SuccessView() {
                     { label: "TX Hash", value: "a1b2c3...f8e9", mono: true },
                   ].map(({ label, value, mono }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{label}</span>
+                      <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>{label}</span>
                       <span
                         style={{
-                          color: "#E2EEFF",
+                          color: "var(--foreground)",
                           fontSize: 12,
                           fontWeight: 500,
                           fontFamily: mono ? "monospace" : FF,
-                          background: mono ? "rgba(255,255,255,0.05)" : "transparent",
+                          background: mono ? "var(--muted)" : "transparent",
                           padding: mono ? "2px 7px" : 0,
                           borderRadius: mono ? 5 : 0,
-                          border: mono ? "1px solid rgba(255,255,255,0.06)" : "none",
+                          border: mono ? "1px solid var(--border)" : "none",
                         }}
                       >
                         {value}
@@ -191,7 +191,7 @@ export function SuccessView() {
               </div>
             </div>
             <div style={{ marginTop: 4, marginLeft: 2 }}>
-              <span style={{ color: "#1E3050", fontSize: 11, fontFamily: FF }}>2:41 PM · Delivered</span>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>2:41 PM · Delivered</span>
             </div>
           </div>
         </div>
@@ -212,11 +212,11 @@ export function SuccessView() {
             style={{
               padding: "10px 16px",
               borderRadius: "16px 16px 16px 4px",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "var(--muted)",
+              border: "1px solid var(--border)",
             }}
           >
-            <p style={{ color: "#7B92B0", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
+            <p style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
               Done! ₱500 has been sent to Maria Santos. Enjoy dinner! 🍽️
             </p>
           </div>
@@ -224,19 +224,19 @@ export function SuccessView() {
       </div>
 
       {/* Input */}
-      <div style={{ padding: "16px 32px 20px", borderTop: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+      <div style={{ padding: "16px 32px 20px", borderTop: "1px solid var(--border)", flexShrink: 0 }}>
         <div
           style={{
             display: "flex", alignItems: "center", gap: 10,
             borderRadius: 12, padding: "10px 14px",
-            background: "rgba(255,255,255,0.04)",
+            background: "var(--muted)",
             border: "1px solid rgba(37,99,235,0.18)",
           }}
         >
           <input
             type="text"
             placeholder='Try "Send ₱200 to Juan" or "Check my balance"'
-            style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "#E2EEFF", fontSize: 14, fontFamily: FF }}
+            style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "var(--foreground)", fontSize: 14, fontFamily: FF }}
           />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <button
@@ -255,11 +255,11 @@ export function SuccessView() {
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
               }}
             >
-              <Send size={14} color="#fff" />
+              <Send size={14} color="var(--foreground)" />
             </button>
           </div>
         </div>
-        <p style={{ textAlign: "center", marginTop: 8, color: "#1A2B40", fontSize: 11, fontFamily: FF }}>
+        <p style={{ textAlign: "center", marginTop: 8, color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>
           Rani uses Stellar · Transactions are irreversible
         </p>
       </div>

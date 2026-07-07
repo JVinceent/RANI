@@ -31,7 +31,9 @@ export function SettingsView() {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#090F1D",
+        background: "var(--background)",
+        color: "var(--foreground)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <Header />
@@ -69,7 +71,7 @@ export function SettingsView() {
             </div>
             <div
               style={{
-                color: "#F0F6FF",
+                color: "var(--foreground)",
                 fontSize: 22,
                 fontWeight: 700,
                 fontFamily: FF,
@@ -81,7 +83,7 @@ export function SettingsView() {
           </div>
           <p
             style={{
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 13,
               fontFamily: FF,
               margin: 0,
@@ -153,7 +155,7 @@ export function SettingsView() {
                   <div
                     style={{
                       padding: "0 24px 22px",
-                      borderTop: "1px solid rgba(255,255,255,0.05)",
+                      borderTop: "1px solid var(--border)",
                       marginTop: 4,
                       paddingTop: 18,
                     }}
@@ -161,7 +163,7 @@ export function SettingsView() {
                     <label
                       style={{
                         display: "block",
-                        color: "#4A6080",
+                        color: "var(--muted-foreground)",
                         fontSize: 11,
                         fontFamily: FF,
                         fontWeight: 700,
@@ -179,11 +181,11 @@ export function SettingsView() {
                         alignItems: "center",
                         borderRadius: 13,
                         padding: "14px 18px",
-                        background: "rgba(255,255,255,0.04)",
+                        background: "var(--background)",
                         border: `1.5px solid ${
                           limitFocused
                             ? "rgba(37,99,235,0.45)"
-                            : "rgba(255,255,255,0.1)"
+                            : "var(--border)"
                         }`,
                         transition: "border-color 150ms",
                       }}
@@ -210,7 +212,7 @@ export function SettingsView() {
                           outline: "none",
                           background: "transparent",
                           border: "none",
-                          color: "#F0F6FF",
+                          color: "var(--foreground)",
                           fontSize: 20,
                           fontWeight: 600,
                           fontFamily: FF,
@@ -218,7 +220,7 @@ export function SettingsView() {
                       />
                       <span
                         style={{
-                          color: "#3A5070",
+                          color: "var(--muted-foreground)",
                           fontSize: 12,
                           fontFamily: FF,
                           flexShrink: 0,
@@ -230,7 +232,7 @@ export function SettingsView() {
 
                     <p
                       style={{
-                        color: "#2A3F5C",
+                        color: "var(--muted-foreground)",
                         fontSize: 12,
                         fontFamily: FF,
                         margin: "8px 0 0",
@@ -265,7 +267,7 @@ export function SettingsView() {
               <div>
                 <div
                   style={{
-                    color: "#E2EEFF",
+                    color: "var(--foreground)",
                     fontSize: 14,
                     fontWeight: 500,
                     fontFamily: FF,
@@ -276,7 +278,7 @@ export function SettingsView() {
                 </div>
                 <div
                   style={{
-                    color: "#4A6080",
+                    color: "var(--muted-foreground)",
                     fontSize: 12,
                     fontFamily: FF,
                   }}
@@ -284,16 +286,15 @@ export function SettingsView() {
                   Receive a push notification for every payment
                 </div>
               </div>
-              <ChevronRight size={16} color="#3A5070" />
+              <ChevronRight size={16} color="var(--muted-foreground)" />
             </div>
           </SettingsSection>
 
-          {/* ── Danger Zone ──────────────────────────────────────── */}
           <div
             style={{
               padding: "22px 24px",
-              background: "rgba(239,68,68,0.03)",
-              border: "1px solid rgba(239,68,68,0.14)",
+              background: "rgba(239,68,68,0.05)",
+              border: "1px solid rgba(239,68,68,0.2)",
               borderRadius: 18,
             }}
           >
@@ -306,10 +307,10 @@ export function SettingsView() {
                 marginBottom: 10,
               }}
             >
-              <AlertTriangle size={14} color="#F87171" />
+              <AlertTriangle size={14} color="#EF4444" />
               <span
                 style={{
-                  color: "#F87171",
+                  color: "#EF4444",
                   fontSize: 11,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -323,7 +324,7 @@ export function SettingsView() {
 
             <p
               style={{
-                color: "#4A6080",
+                color: "var(--muted-foreground)",
                 fontSize: 13,
                 fontFamily: FF,
                 margin: "0 0 18px",
@@ -346,18 +347,18 @@ export function SettingsView() {
                 padding: "11px 22px",
                 borderRadius: 11,
                 background: hoverDisconnect
-                  ? "rgba(239,68,68,0.1)"
+                  ? "rgba(239,68,68,0.15)"
                   : "transparent",
                 border: "1.5px solid rgba(239,68,68,0.5)",
                 cursor: "pointer",
-                color: "#F87171",
+                color: "#EF4444",
                 fontSize: 14,
                 fontWeight: 600,
                 fontFamily: FF,
                 transition: "background 150ms",
               }}
             >
-              <LogOut size={15} color="#F87171" />
+              <LogOut size={15} color="#EF4444" />
               Disconnect Wallet
             </button>
           </div>
@@ -386,10 +387,10 @@ function Toggle({
         width: 52,
         height: 28,
         borderRadius: 14,
-        background: enabled ? "#2563EB" : "rgba(255,255,255,0.09)",
+        background: enabled ? "#2563EB" : "var(--muted)",
         border: enabled
           ? "1px solid rgba(37,99,235,0.6)"
-          : "1px solid rgba(255,255,255,0.14)",
+          : "1px solid var(--border)",
         cursor: "pointer",
         transition: "background 220ms, border-color 220ms",
         flexShrink: 0,
@@ -431,18 +432,19 @@ function SettingsSection({
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.025)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         borderRadius: 18,
         overflow: "hidden",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.02)",
       }}
     >
       {/* Section header */}
       <div
         style={{
           padding: "12px 24px",
-          background: "rgba(37,99,235,0.04)",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          background: "var(--muted)",
+          borderBottom: "1px solid var(--border)",
           display: "flex",
           alignItems: "center",
           gap: 7,
@@ -451,7 +453,7 @@ function SettingsSection({
         {icon}
         <span
           style={{
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 11,
             fontFamily: FF,
             fontWeight: 700,
@@ -489,7 +491,7 @@ function SettingRow({
       <div style={{ flex: 1 }}>
         <div
           style={{
-            color: "#E2EEFF",
+            color: "var(--foreground)",
             fontSize: 14,
             fontWeight: 600,
             fontFamily: FF,
@@ -500,7 +502,7 @@ function SettingRow({
         </div>
         <div
           style={{
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             fontFamily: FF,
             lineHeight: 1.5,
@@ -519,7 +521,7 @@ function Divider() {
     <div
       style={{
         height: 1,
-        background: "rgba(255,255,255,0.05)",
+        background: "var(--border)",
         margin: "0 24px",
       }}
     />

@@ -20,9 +20,9 @@ const FF = "'DM Sans', sans-serif";
 const pillButtonStyle: CSSProperties = {
   padding: "8px 16px",
   borderRadius: 9,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  color: "#E2EEFF",
+  backgroundColor: "var(--muted)",
+  border: "1px solid var(--border)",
+  color: "var(--muted-foreground)",
   fontSize: 13,
   fontFamily: FF,
   cursor: "pointer",
@@ -30,9 +30,8 @@ const pillButtonStyle: CSSProperties = {
 
 const pillButtonStylePrimary: CSSProperties = {
   ...pillButtonStyle,
-  background: "#2563EB",
   border: "none",
-  color: "#fff",
+  color: "var(--muted-foreground)",
   fontWeight: 600,
 };
 
@@ -300,7 +299,8 @@ if (awaiting === "amount") {
         flexDirection: "column",
         height: "100%",
         position: "relative",
-        background: "#080E1C",
+        background: "var(--background)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <Header />
@@ -418,7 +418,7 @@ if (awaiting === "amount") {
       <div
         style={{
           padding: "14px 32px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--border)",
           flexShrink: 0,
         }}
       >
@@ -429,7 +429,7 @@ if (awaiting === "amount") {
             gap: 10,
             borderRadius: 14,
             padding: "12px 16px",
-            background: "rgba(255,255,255,0.04)",
+            background: "var(--muted)",
             border: "1px solid rgba(37,99,235,0.2)",
           }}
         >
@@ -444,7 +444,7 @@ if (awaiting === "amount") {
               outline: "none",
               background: "transparent",
               border: "none",
-              color: "#E2EEFF",
+              color: "var(--foreground)",
               fontSize: 14,
               fontFamily: FF,
             }}
@@ -488,7 +488,7 @@ if (awaiting === "amount") {
             textAlign: "center",
             marginTop: 8,
             marginBottom: 0,
-            color: "#1A2B40",
+            color: "var(--muted-foreground)",
             fontSize: 11,
             fontFamily: FF,
           }}
@@ -559,7 +559,7 @@ function LandingState({
             width: 78,
             height: 78,
             borderRadius: "50%",
-            background: "#080E1C",
+          background: "var(--background)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -572,7 +572,7 @@ function LandingState({
       <div style={{ textAlign: "center", maxWidth: 500 }}>
         <div
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 36,
             fontWeight: 700,
             fontFamily: FF,
@@ -584,7 +584,7 @@ function LandingState({
         </div>
         <div
           style={{
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 15,
             fontFamily: FF,
             marginTop: 12,
@@ -657,7 +657,7 @@ function QuickPill({
     solid: {
       background: hover ? "#1D4ED8" : "#2563EB",
       border: "none",
-      color: "#fff",
+      color: "var(--foreground)",
     },
     green: {
       background: hover ? "#009144" : "#00A651",
@@ -671,9 +671,9 @@ function QuickPill({
       color: "#60A5FA",
     },
     ghost: {
-      background: hover ? "rgba(255,255,255,0.06)" : "transparent",
-      border: "1.5px solid rgba(255,255,255,0.1)",
-      color: "#7B92B0",
+      background: hover ? "var(--muted)" : "transparent",
+      border: "1.5px solid var(--border)",
+      color: "var(--muted-foreground)",
     },
   };
 
@@ -736,7 +736,7 @@ function ChatThread({
                 maxWidth: 360,
               }}
             >
-              <p style={{ color: "#fff", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
+              <p style={{ color: "var(--foreground)", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
                 {m.text}
               </p>
             </div>
@@ -891,14 +891,14 @@ function DisambiguationBlock({
                 </span>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
+                <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
                   {contact.name}
                 </div>
-                <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
                   {contact.address.slice(0, 6)}...{contact.address.slice(-4)}
                 </div>
               </div>
-              <ArrowRight size={16} color={isHovered ? color : "#2A3F5C"} />
+              <ArrowRight size={16} color={isHovered ? color : "var(--muted-foreground)"} />
             </motion.button>
           );
         })}
@@ -942,8 +942,8 @@ function SummaryBlock({
         style={{
           borderRadius: 18,
           overflow: "hidden",
-          background: "#0C1929",
-          border: "1px solid rgba(255,255,255,0.07)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           width: 480,
         }}
       >
@@ -959,7 +959,7 @@ function SummaryBlock({
             <div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 10,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -972,7 +972,7 @@ function SummaryBlock({
               </div>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 30,
                   fontWeight: 700,
                   fontFamily: FF,
@@ -984,7 +984,7 @@ function SummaryBlock({
               </div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 11,
                   fontFamily: FF,
                   marginTop: 3,
@@ -1012,7 +1012,7 @@ function SummaryBlock({
           <div
             style={{
               height: 1,
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--border)",
               marginBottom: 18,
             }}
           />
@@ -1028,7 +1028,7 @@ function SummaryBlock({
             <div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 10,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1067,7 +1067,7 @@ function SummaryBlock({
                 <div>
                   <div
                     style={{
-                      color: "#E2EEFF",
+                      color: "var(--foreground)",
                       fontSize: 14,
                       fontWeight: 600,
                       fontFamily: FF,
@@ -1077,7 +1077,7 @@ function SummaryBlock({
                   </div>
                   <div
                     style={{
-                      color: "#2A3F5C",
+                      color: "var(--muted-foreground)",
                       fontSize: 11,
                       fontFamily: "monospace",
                       marginTop: 1,
@@ -1091,7 +1091,7 @@ function SummaryBlock({
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 10,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1128,7 +1128,7 @@ function SummaryBlock({
               background: hover ? "#1D4ED8" : "#2563EB",
               border: "none",
               cursor: "pointer",
-              color: "#fff",
+              color: "var(--foreground)",
               fontSize: 14,
               fontWeight: 600,
               fontFamily: FF,
@@ -1140,7 +1140,7 @@ function SummaryBlock({
             }}
           >
             Review & Send
-            <ArrowRight size={15} color="#fff" />
+            <ArrowRight size={15} color="var(--foreground)" />
           </button>
         </div>
       </div>
@@ -1166,8 +1166,8 @@ function ConfirmModal({
       style={{
         width: 480,
         borderRadius: 22,
-        background: "#0D1929",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         boxShadow:
           "0 40px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(37,99,235,0.07)",
         overflow: "hidden",
@@ -1229,15 +1229,15 @@ function ConfirmModal({
             width: 30,
             height: 30,
             borderRadius: 9,
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "var(--muted)",
+            border: "1px solid var(--border)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <X size={14} color="#4A6080" />
+          <X size={14} color="var(--muted-foreground)" />
         </button>
       </div>
 
@@ -1257,7 +1257,7 @@ function ConfirmModal({
           <div>
             <div
               style={{
-                color: "#3A5070",
+                color: "var(--muted-foreground)",
                 fontSize: 9,
                 fontFamily: FF,
                 fontWeight: 700,
@@ -1270,7 +1270,7 @@ function ConfirmModal({
             </div>
             <div
               style={{
-                color: "#F0F6FF",
+                color: "var(--foreground)",
                 fontSize: 28,
                 fontWeight: 700,
                 fontFamily: FF,
@@ -1281,11 +1281,11 @@ function ConfirmModal({
               ₱500.00
             </div>
           </div>
-          <ArrowRight size={20} color="#2A3F5C" />
+          <ArrowRight size={20} color="var(--muted-foreground)" />
           <div style={{ textAlign: "right" }}>
             <div
               style={{
-                color: "#3A5070",
+                color: "var(--muted-foreground)",
                 fontSize: 9,
                 fontFamily: FF,
                 fontWeight: 700,
@@ -1325,18 +1325,18 @@ function ConfirmModal({
               alignItems: "center",
               padding: "9px 0",
               borderBottom:
-                i < arr.length - 1
-                  ? "1px solid rgba(255,255,255,0.04)"
-                  : "none",
+ i < arr.length - 1
+ ? "1px solid var(--border)"
+                      : "none",
             }}
           >
-            <span style={{ color: "#4A6080", fontSize: 13, fontFamily: FF }}>
+                <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF }}>
               {label}
             </span>
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#E2EEFF",
+                      color: "var(--foreground)",
                   fontSize: 13,
                   fontWeight: 500,
                   fontFamily: FF,
@@ -1347,7 +1347,7 @@ function ConfirmModal({
               {sub && (
                 <div
                   style={{
-                    color: "#2A3F5C",
+                        color: "var(--muted-foreground)",
                     fontSize: 11,
                     fontFamily: FF,
                   }}
@@ -1402,7 +1402,7 @@ function ConfirmModal({
               background: hover ? "#1D4ED8" : "#2563EB",
               border: "none",
               cursor: "pointer",
-              color: "#fff",
+              color: "var(--foreground)",
               fontSize: 14,
               fontWeight: 600,
               fontFamily: FF,
@@ -1424,13 +1424,13 @@ function ConfirmModal({
               background: "transparent",
               border: "none",
               cursor: "pointer",
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 13,
               fontFamily: FF,
               transition: "color 150ms",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
           >
             Cancel
           </button>
@@ -1453,7 +1453,7 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
         style={{
           borderRadius: 18,
           overflow: "hidden",
-          background: "#0C1929",
+          background: "var(--card)",
           border: "1px solid rgba(34,197,94,0.24)",
           boxShadow: "0 0 48px rgba(34,197,94,0.08)",
           width: 480,
@@ -1500,7 +1500,7 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
             </div>
             <div
               style={{
-                color: "#4A6080",
+                color: "var(--muted-foreground)",
                 fontSize: 12,
                 fontFamily: FF,
                 marginTop: 1,
@@ -1523,7 +1523,7 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
             <div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 9,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1536,7 +1536,7 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
               </div>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 24,
                   fontWeight: 700,
                   fontFamily: FF,
@@ -1551,7 +1551,7 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 9,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1580,7 +1580,7 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
           <div
             style={{
               height: 1,
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--border)",
               marginBottom: 14,
             }}
           />
@@ -1609,17 +1609,17 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
                 }}
               >
                 <span
-                  style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}
+                  style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}
                 >
                   {label}
                 </span>
                 <span
                   style={{
-                    color: "#E2EEFF",
+                    color: "var(--foreground)",
                     fontSize: 12,
                     fontWeight: 500,
                     fontFamily: mono ? "monospace" : FF,
-                    background: mono ? "rgba(255,255,255,0.05)" : "transparent",
+                    background: mono ? "var(--muted)" : "transparent",
                     padding: mono ? "2px 8px" : 0,
                     borderRadius: mono ? 5 : 0,
                     border: mono ? "1px solid rgba(255,255,255,0.06)" : "none",
@@ -1675,13 +1675,13 @@ function SuccessBlock({ onReset }: { onReset: () => void }) {
               background: "transparent",
               border: "none",
               cursor: "pointer",
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 12,
               fontFamily: FF,
               transition: "color 150ms",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
           >
             ↩ Try another transaction
           </button>
@@ -1722,14 +1722,14 @@ function AIChatBubble({ children }: { children: ReactNode }) {
       style={{
         padding: "10px 15px",
         borderRadius: "14px 14px 14px 4px",
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "var(--muted)",
+        border: "1px solid var(--border)",
         maxWidth: 420,
       }}
     >
       <p
         style={{
-          color: "#7B92B0",
+          color: "var(--muted-foreground)",
           fontSize: 14,
           fontFamily: FF,
           lineHeight: 1.6,
@@ -1746,11 +1746,11 @@ function DateSep({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <div
-        style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }}
+        style={{ flex: 1, height: 1, background: "var(--border)" }}
       />
       <span
         style={{
-          color: "#2A3F5C",
+          color: "var(--muted-foreground)",
           fontSize: 11,
           fontFamily: FF,
           fontWeight: 500,
@@ -1760,7 +1760,7 @@ function DateSep({ label }: { label: string }) {
         {label}
       </span>
       <div
-        style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }}
+        style={{ flex: 1, height: 1, background: "var(--border)" }}
       />
     </div>
   );
@@ -1855,22 +1855,21 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
       style={{
         borderRadius: 18,
         overflow: "hidden",
-        background: "#0C1929",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         width: 480,
       }}
     >
       <div
         style={{
           padding: "22px 24px 18px",
-          background:
-            "linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(37,99,235,0.02) 100%)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--muted)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         <div
           style={{
-            color: "#3A5070",
+            color: "var(--muted-foreground)",
             fontSize: 10,
             fontFamily: FF,
             fontWeight: 700,
@@ -1883,7 +1882,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
         </div>
         <div
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 32,
             fontWeight: 700,
             fontFamily: FF,
@@ -1912,7 +1911,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
           >
             ↑ +2.4%
           </span>
-          <span style={{ color: "#3A5070", fontSize: 12, fontFamily: FF }}>
+          <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
             24h · Last updated just now
           </span>
         </div>
@@ -1928,8 +1927,8 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
               gap: 14,
               padding: "12px 24px",
               borderBottom:
-                i < PORTFOLIO_ASSETS.length - 1
-                  ? "1px solid rgba(255,255,255,0.04)"
+ i < PORTFOLIO_ASSETS.length - 1
+ ? "1px solid var(--border)"
                   : "none",
             }}
           >
@@ -1961,7 +1960,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
             <div style={{ flex: 1 }}>
               <div
                 style={{
-                  color: "#E2EEFF",
+                  color: "var(--foreground)",
                   fontSize: 13,
                   fontWeight: 600,
                   fontFamily: FF,
@@ -1970,7 +1969,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
                 {asset.name}
               </div>
               <div
-                style={{ color: "#3A5070", fontSize: 11, fontFamily: FF }}
+                style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}
               >
                 {asset.label}
               </div>
@@ -1979,7 +1978,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 14,
                   fontWeight: 600,
                   fontFamily: FF,
@@ -2005,7 +2004,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
       <div
         style={{
           padding: "12px 24px",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
+          borderTop: "1px solid var(--border)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -2016,14 +2015,14 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
           style={{
             background: "none",
             border: "none",
-            cursor: "pointer",
-            color: "#3A5070",
+              cursor: "pointer",
+              color: "var(--muted-foreground)",
             fontSize: 12,
             fontFamily: FF,
             transition: "color 150ms",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
         >
           ↩ Back
         </button>

@@ -7,14 +7,14 @@ export function ClarificationState() {
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#070F1C" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--background)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
       {/* Header */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           padding: "16px 32px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--border)",
           flexShrink: 0,
         }}
       >
@@ -34,10 +34,10 @@ export function ClarificationState() {
             <Sparkles size={15} color="#60A5FA" />
           </div>
           <div>
-            <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Rani AI</div>
+            <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>Rani AI</div>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 1 }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#F59E0B" }} />
-              <span style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>Needs clarification</span>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>Needs clarification</span>
             </div>
           </div>
         </div>
@@ -56,11 +56,11 @@ export function ClarificationState() {
       >
         {/* Date separator */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-          <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF, fontWeight: 500, whiteSpace: "nowrap" }}>
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+          <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, fontWeight: 500, whiteSpace: "nowrap" }}>
             Today, July 4
           </span>
-          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+          <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
         </div>
 
         {/* User message */}
@@ -73,7 +73,7 @@ export function ClarificationState() {
               maxWidth: 380,
             }}
           >
-            <p style={{ color: "#fff", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
+            <p style={{ color: "var(--foreground)", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
               Send P500 to Maria for dinner
             </p>
             <div style={{ textAlign: "right", marginTop: 4 }}>
@@ -105,18 +105,18 @@ export function ClarificationState() {
               style={{
                 borderRadius: 16,
                 padding: 18,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "var(--muted)",
+                border: "1px solid var(--border)",
               }}
             >
-              <p style={{ color: "#E2EEFF", fontSize: 14, fontWeight: 500, fontFamily: FF, lineHeight: 1.5, marginBottom: 6 }}>
+              <p style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500, fontFamily: FF, lineHeight: 1.5, marginBottom: 6 }}>
                 I found multiple contacts named "Maria." Which one?
               </p>
-              <p style={{ color: "#7B92B0", fontSize: 13, fontFamily: FF, lineHeight: 1.5, marginBottom: 14 }}>
+              <p style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, lineHeight: 1.5, marginBottom: 14 }}>
                 Please select who you'd like to send ₱500 to:
               </p>
 
-              <div style={{ height: 1, background: "rgba(255,255,255,0.05)", marginBottom: 14 }} />
+              <div style={{ height: 1, background: "var(--border)", marginBottom: 14 }} />
 
               {/* Contact options */}
               <div style={{ display: "flex", gap: 10 }}>
@@ -134,8 +134,8 @@ export function ClarificationState() {
                         borderRadius: 12,
                         padding: 14,
                         textAlign: "left",
-                        background: isSelected ? "#2563EB" : "rgba(255,255,255,0.04)",
-                        border: isSelected ? "1px solid rgba(96,165,250,0.4)" : "1px solid rgba(255,255,255,0.07)",
+                        background: isSelected ? "#2563EB" : "var(--muted)",
+                        border: isSelected ? "1px solid rgba(96,165,250,0.4)" : "1px solid var(--border)",
                         cursor: "pointer",
                         transition: "all 150ms",
                       }}
@@ -154,15 +154,15 @@ export function ClarificationState() {
                             flexShrink: 0,
                           }}
                         >
-                          <span style={{ color: isSelected ? "#fff" : "#60A5FA", fontSize: 12, fontWeight: 600, fontFamily: FF }}>
+                          <span style={{ color: isSelected ? "var(--foreground)" : "#60A5FA", fontSize: 12, fontWeight: 600, fontFamily: FF }}>
                             {initials}
                           </span>
                         </div>
                         <div>
-                          <div style={{ color: isSelected ? "#fff" : "#E2EEFF", fontSize: 13, fontWeight: 600, fontFamily: FF }}>
+                          <div style={{ color: isSelected ? "var(--foreground)" : "var(--foreground)", fontSize: 13, fontWeight: 600, fontFamily: FF }}>
                             {name}
                           </div>
-                          <div style={{ color: isSelected ? "rgba(255,255,255,0.5)" : "#4A6080", fontSize: 11, fontFamily: FF }}>
+                          <div style={{ color: isSelected ? "rgba(255,255,255,0.5)" : "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>
                             {handle}
                           </div>
                         </div>
@@ -171,11 +171,11 @@ export function ClarificationState() {
                         style={{
                           borderRadius: 6,
                           padding: "3px 8px",
-                          background: isSelected ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.04)",
+                          background: isSelected ? "rgba(255,255,255,0.1)" : "var(--muted)",
                           display: "inline-block",
                         }}
                       >
-                        <span style={{ color: isSelected ? "rgba(255,255,255,0.55)" : "#2A3F5C", fontSize: 10, fontFamily: "monospace" }}>
+                        <span style={{ color: isSelected ? "rgba(255,255,255,0.55)" : "var(--muted-foreground)", fontSize: 10, fontFamily: "monospace" }}>
                           {addr}
                         </span>
                       </div>
@@ -194,7 +194,7 @@ export function ClarificationState() {
                     background: "#2563EB",
                     border: "none",
                     cursor: "pointer",
-                    color: "#fff",
+                    color: "var(--foreground)",
                     fontSize: 13,
                     fontWeight: 600,
                     fontFamily: FF,
@@ -206,14 +206,14 @@ export function ClarificationState() {
               )}
             </div>
             <div style={{ marginTop: 4, marginLeft: 2 }}>
-              <span style={{ color: "#1E3050", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>2:41 PM</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Input */}
-      <div style={{ padding: "16px 32px 20px", borderTop: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+      <div style={{ padding: "16px 32px 20px", borderTop: "1px solid var(--border)", flexShrink: 0 }}>
         <div
           style={{
             display: "flex",
@@ -221,14 +221,14 @@ export function ClarificationState() {
             gap: 10,
             borderRadius: 12,
             padding: "10px 14px",
-            background: "rgba(255,255,255,0.04)",
+            background: "var(--muted)",
             border: "1px solid rgba(37,99,235,0.18)",
           }}
         >
           <input
             type="text"
             placeholder="Select a contact above or type a message…"
-            style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "#E2EEFF", fontSize: 14, fontFamily: FF }}
+            style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "var(--foreground)", fontSize: 14, fontFamily: FF }}
           />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <button

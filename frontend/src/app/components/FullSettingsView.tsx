@@ -44,7 +44,8 @@ export function FullSettingsView({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#090F1D",
+        background: "var(--background)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       {/* ── Enhanced header ── */}
@@ -61,7 +62,7 @@ export function FullSettingsView({
             flex: 1,
             overflowY: "auto",
             padding: "32px 40px",
-            background: "#090F1D",
+            background: "var(--background)",
           }}
         >
           <AnimatePresence mode="wait">
@@ -97,7 +98,7 @@ function EnhancedHeader() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 28px",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid var(--border)",
         flexShrink: 0,
       }}
     >
@@ -114,7 +115,7 @@ function EnhancedHeader() {
           <Sparkles size={16} color="#60A5FA" />
         </div>
         <div>
-          <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
+          <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
             Rani AI
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
@@ -125,7 +126,7 @@ function EnhancedHeader() {
                 boxShadow: "0 0 7px rgba(34,197,94,0.65)",
               }}
             />
-            <span style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>Online</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>Online</span>
           </div>
         </div>
       </div>
@@ -168,8 +169,8 @@ function SettingsSubNav({
       style={{
         width: 236,
         flexShrink: 0,
-        borderRight: "1px solid rgba(255,255,255,0.06)",
-        background: "#07101F",
+        borderRight: "1px solid var(--border)",
+        background: "var(--card)",
         padding: "24px 12px",
         display: "flex",
         flexDirection: "column",
@@ -179,7 +180,7 @@ function SettingsSubNav({
       {/* Title */}
       <div
         style={{
-          color: "#3A5070",
+          color: "var(--muted-foreground)",
           fontSize: 10,
           fontFamily: FF,
           fontWeight: 700,
@@ -204,7 +205,7 @@ function SettingsSubNav({
               width: "100%",
               padding: "10px 12px",
               borderRadius: 10,
-              background: active ? "rgba(37,99,235,0.14)" : "transparent",
+              background: active ? "var(--muted)" : "transparent",
               border: active
                 ? "1px solid rgba(37,99,235,0.22)"
                 : "1px solid transparent",
@@ -220,7 +221,7 @@ function SettingsSubNav({
             />
             <span
               style={{
-                color: active ? "#93C5FD" : "#7B92B0",
+                color: active ? "#93C5FD" : "var(--muted-foreground)",
                 fontSize: 13,
                 fontFamily: FF,
                 fontWeight: active ? 600 : 400,
@@ -279,7 +280,7 @@ function ProfileVariant() {
                 width: 72,
                 height: 72,
                 borderRadius: "50%",
-                background: "#090F1D",
+                background: "var(--background)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -368,7 +369,7 @@ function ProfileVariant() {
       <div
         style={{
           height: 1,
-          background: "rgba(255,255,255,0.05)",
+          background: "var(--border)",
           marginBottom: 22,
         }}
       />
@@ -386,7 +387,7 @@ function ProfileVariant() {
         <div>
           <div
             style={{
-              color: "#E2EEFF",
+              color: "var(--foreground)",
               fontSize: 14,
               fontWeight: 500,
               fontFamily: FF,
@@ -395,7 +396,7 @@ function ProfileVariant() {
           >
             Show public address to contacts
           </div>
-          <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, lineHeight: 1.5 }}>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, lineHeight: 1.5 }}>
             Let contacts see your Stellar address when they search your name.
           </div>
           {showAddress && (
@@ -406,14 +407,14 @@ function ProfileVariant() {
                 marginTop: 10,
                 padding: "7px 12px",
                 borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "var(--muted)",
+                border: "1px solid var(--border)",
                 display: "inline-block",
               }}
             >
               <span
                 style={{
-                  color: "#4A6080",
+                  color: "var(--muted-foreground)",
                   fontSize: 11,
                   fontFamily: "monospace",
                 }}
@@ -511,7 +512,7 @@ function WalletVariant() {
                 ? asset.cardGradient.replace("0.1", "0.14").replace("0.05", "0.08")
                 : asset.cardGradient,
               border: `1px solid ${
-                hoverCard === asset.id ? asset.borderColor : "rgba(255,255,255,0.07)"
+                hoverCard === asset.id ? asset.borderColor : "var(--border)"
               }`,
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
@@ -560,12 +561,12 @@ function WalletVariant() {
 
               <span
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 12,
                   fontFamily: FF,
                   fontWeight: 600,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "var(--muted)",
+                  border: "1px solid var(--border)",
                   padding: "4px 10px",
                   borderRadius: 20,
                 }}
@@ -577,7 +578,7 @@ function WalletVariant() {
             {/* Balance */}
             <div
               style={{
-                color: "#F0F6FF",
+                color: "var(--foreground)",
                 fontSize: 26,
                 fontWeight: 700,
                 fontFamily: FF,
@@ -593,7 +594,7 @@ function WalletVariant() {
             <div style={{ marginBottom: 14 }}>
               <div
                 style={{
-                  color: "#7B92B0",
+                  color: "var(--muted-foreground)",
                   fontSize: 13,
                   fontFamily: FF,
                   marginBottom: 2,
@@ -601,7 +602,7 @@ function WalletVariant() {
               >
                 {asset.name}
               </div>
-              <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF }}>
+              <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
                 {asset.secondary}
               </div>
             </div>
@@ -611,14 +612,14 @@ function WalletVariant() {
               style={{
                 padding: "7px 11px",
                 borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "var(--muted)",
+                border: "1px solid var(--border)",
                 marginBottom: 16,
               }}
             >
               <span
                 style={{
-                  color: "#4A6080",
+                  color: "var(--muted-foreground)",
                   fontSize: 11,
                   fontFamily: "monospace",
                 }}
@@ -706,8 +707,8 @@ function SecurityVariant() {
       {/* Panel */}
       <div
         style={{
-          background: "rgba(255,255,255,0.025)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--muted)",
+          border: "1px solid var(--border)",
           borderRadius: 18,
           overflow: "hidden",
           marginBottom: 16,
@@ -727,7 +728,7 @@ function SecurityVariant() {
           <div
             style={{
               height: 1,
-              background: "rgba(255,255,255,0.05)",
+              background: "var(--border)",
               margin: "16px 0",
             }}
           />
@@ -743,8 +744,8 @@ function SecurityVariant() {
       {/* Spending limits panel */}
       <div
         style={{
-          background: "rgba(255,255,255,0.025)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--muted)",
+          border: "1px solid var(--border)",
           borderRadius: 18,
           overflow: "hidden",
           marginBottom: 24,
@@ -775,7 +776,7 @@ function SecurityVariant() {
                   <label
                     style={{
                       display: "block",
-                      color: "#4A6080",
+                      color: "var(--muted-foreground)",
                       fontSize: 11,
                       fontFamily: FF,
                       fontWeight: 700,
@@ -792,11 +793,11 @@ function SecurityVariant() {
                       alignItems: "center",
                       borderRadius: 12,
                       padding: "13px 16px",
-                      background: "rgba(255,255,255,0.04)",
+                      background: "var(--muted)",
                       border: `1.5px solid ${
                         limitFocused
                           ? "rgba(37,99,235,0.45)"
-                          : "rgba(255,255,255,0.09)"
+                          : "var(--border)"
                       }`,
                       transition: "border-color 150ms",
                     }}
@@ -823,13 +824,13 @@ function SecurityVariant() {
                         outline: "none",
                         background: "transparent",
                         border: "none",
-                        color: "#F0F6FF",
+                          color: "var(--foreground)",
                         fontSize: 20,
                         fontWeight: 600,
                         fontFamily: FF,
                       }}
                     />
-                    <span style={{ color: "#3A5070", fontSize: 12, fontFamily: FF }}>
+                      <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
                       PHP / day
                     </span>
                   </div>
@@ -861,8 +862,8 @@ function NotificationsVariant() {
 
       <div
         style={{
-          background: "rgba(255,255,255,0.025)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--muted)",
+          border: "1px solid var(--border)",
           borderRadius: 18,
           overflow: "hidden",
           marginBottom: 16,
@@ -890,7 +891,7 @@ function NotificationsVariant() {
                 <div
                   style={{
                     height: 1,
-                    background: "rgba(255,255,255,0.05)",
+                    background: "var(--border)",
                     margin: "14px 0",
                   }}
                 />
@@ -926,8 +927,8 @@ function LanguageVariant() {
 
       <div
         style={{
-          background: "rgba(255,255,255,0.025)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--muted)",
+          border: "1px solid var(--border)",
           borderRadius: 18,
           overflow: "hidden",
           marginBottom: 24,
@@ -948,13 +949,13 @@ function LanguageVariant() {
                 justifyContent: "space-between",
                 padding: "14px 24px",
                 borderBottom:
-                  i < LANGUAGES.length - 1
-                    ? "1px solid rgba(255,255,255,0.04)"
+ i < LANGUAGES.length - 1
+ ? "1px solid var(--border)"
                     : "none",
                 cursor: "pointer",
                 background:
                   selected === lang.code
-                    ? "rgba(37,99,235,0.07)"
+                    ? "var(--muted)"
                     : "transparent",
                 transition: "background 150ms",
               }}
@@ -962,7 +963,7 @@ function LanguageVariant() {
               <div>
                 <div
                   style={{
-                    color: selected === lang.code ? "#E2EEFF" : "#7B92B0",
+                    color: selected === lang.code ? "var(--foreground)" : "var(--muted-foreground)",
                     fontSize: 14,
                     fontFamily: FF,
                     fontWeight: selected === lang.code ? 600 : 400,
@@ -971,7 +972,7 @@ function LanguageVariant() {
                 >
                   {lang.name}
                 </div>
-                <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF }}>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
                   {lang.region}
                 </div>
               </div>
@@ -1019,10 +1020,10 @@ function Toggle({
         width: 52,
         height: 28,
         borderRadius: 14,
-        background: enabled ? "#2563EB" : "rgba(255,255,255,0.09)",
+        background: enabled ? "#2563EB" : "var(--muted)",
         border: enabled
           ? "1px solid rgba(37,99,235,0.6)"
-          : "1px solid rgba(255,255,255,0.14)",
+          : "1px solid var(--border)",
         cursor: "pointer",
         transition: "background 220ms, border-color 220ms",
         flexShrink: 0,
@@ -1069,7 +1070,7 @@ function ToggleRow({
       <div style={{ flex: 1 }}>
         <div
           style={{
-            color: "#E2EEFF",
+            color: "var(--foreground)",
             fontSize: 14,
             fontWeight: 500,
             fontFamily: FF,
@@ -1080,7 +1081,7 @@ function ToggleRow({
         </div>
         <div
           style={{
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 13,
             fontFamily: FF,
             lineHeight: 1.5,
@@ -1098,7 +1099,7 @@ function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
-        color: "#F0F6FF",
+        color: "var(--foreground)",
         fontSize: 20,
         fontWeight: 700,
         fontFamily: FF,
@@ -1122,8 +1123,8 @@ function PanelHeader({
     <div
       style={{
         padding: "12px 24px",
-        background: "rgba(37,99,235,0.04)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "var(--muted)",
+        borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
         gap: 7,
@@ -1132,7 +1133,7 @@ function PanelHeader({
       {icon}
       <span
         style={{
-          color: "#4A6080",
+          color: "var(--muted-foreground)",
           fontSize: 11,
           fontFamily: FF,
           fontWeight: 700,
@@ -1158,7 +1159,7 @@ function FieldGroup({
       <label
         style={{
           display: "block",
-          color: "#4A6080",
+          color: "var(--muted-foreground)",
           fontSize: 11,
           fontFamily: FF,
           fontWeight: 700,
@@ -1178,13 +1179,13 @@ function inputStyle(focused: boolean): CSSProperties {
   return {
     width: "100%",
     outline: "none",
-    background: "rgba(255,255,255,0.04)",
+    background: "var(--muted)",
     border: `1.5px solid ${
-      focused ? "rgba(37,99,235,0.45)" : "rgba(255,255,255,0.09)"
+      focused ? "rgba(37,99,235,0.45)" : "var(--border)"
     }`,
     borderRadius: 12,
     padding: "13px 16px",
-    color: "#F0F6FF",
+    color: "var(--foreground)",
     fontSize: 15,
     fontFamily: FF,
     boxSizing: "border-box",
@@ -1204,7 +1205,7 @@ function SaveButton() {
         background: hover ? "#1D4ED8" : "#2563EB",
         border: "none",
         cursor: "pointer",
-        color: "#fff",
+        color: "var(--foreground)",
         fontSize: 14,
         fontWeight: 600,
         fontFamily: FF,

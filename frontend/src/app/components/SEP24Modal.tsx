@@ -54,18 +54,19 @@ export function SEP24Modal({ onClose }: SEP24ModalProps) {
         style={{
           width: 520,
           borderRadius: 22,
-          background: "#0D1929",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           boxShadow: "0 48px 96px rgba(0,0,0,0.72), 0 0 0 1px rgba(37,99,235,0.06)",
           overflow: "hidden",
+          transition: "background-color 0.3s ease, border-color 0.3s ease",
         }}
       >
         {/* ── Browser chrome ───────────────────────────────────────── */}
         <div
           style={{
             padding: "11px 16px",
-            background: "rgba(255,255,255,0.03)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            background: "var(--muted)",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             gap: 10,
@@ -90,12 +91,12 @@ export function SEP24Modal({ onClose }: SEP24ModalProps) {
               gap: 7,
               padding: "5px 12px",
               borderRadius: 7,
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "var(--muted)",
+              border: "1px solid var(--border)",
             }}
           >
             <Lock size={10} color="#22C55E" />
-            <span style={{ color: "#7B92B0", fontSize: 11, fontFamily: "monospace" }}>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "monospace" }}>
               anchor.gcash.stellar.ph/sep24/deposit
             </span>
           </div>
@@ -107,15 +108,15 @@ export function SEP24Modal({ onClose }: SEP24ModalProps) {
               width: 26,
               height: 26,
               borderRadius: 7,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "var(--muted)",
+              border: "1px solid var(--border)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <X size={13} color="#4A6080" />
+            <X size={13} color="var(--muted-foreground)" />
           </button>
         </div>
 
@@ -207,32 +208,32 @@ function FormStep({
               flexShrink: 0,
             }}
           >
-            <span style={{ color: "#fff", fontSize: 18, fontWeight: 800, fontFamily: FF }}>G</span>
+            <span style={{ color: "var(--foreground)", fontSize: 18, fontWeight: 800, fontFamily: FF }}>G</span>
           </div>
           <div>
-            <div style={{ color: "#F0F6FF", fontSize: 16, fontWeight: 600, fontFamily: FF }}>
+            <div style={{ color: "var(--foreground)", fontSize: 16, fontWeight: 600, fontFamily: FF }}>
               Deposit via GCash
             </div>
-            <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 1 }}>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 1 }}>
               Stellar Anchor (SEP-24)
             </div>
           </div>
         </div>
-        <p style={{ color: "#7B92B0", fontSize: 13, fontFamily: FF, lineHeight: 1.55, margin: 0 }}>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, lineHeight: 1.55, margin: 0 }}>
           Funds deposited via GCash will be converted to USDC and credited
           to your Stellar wallet instantly.
         </p>
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: "rgba(255,255,255,0.05)", marginBottom: 22 }} />
+      <div style={{ height: 1, background: "var(--border)", marginBottom: 22 }} />
 
       {/* Amount input */}
       <div style={{ marginBottom: 14 }}>
         <label
           style={{
             display: "block",
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 11,
             fontFamily: FF,
             fontWeight: 700,
@@ -249,7 +250,7 @@ function FormStep({
             alignItems: "center",
             borderRadius: 13,
             padding: "15px 18px",
-            background: "rgba(255,255,255,0.04)",
+            background: "var(--muted)",
             border: `1.5px solid ${
               focused ? "rgba(37,99,235,0.5)" : "rgba(255,255,255,0.08)"
             }`,
@@ -257,7 +258,7 @@ function FormStep({
           }}
         >
           <span
-            style={{ color: "#4A6080", fontSize: 20, fontFamily: FF, marginRight: 8 }}
+            style={{ color: "var(--muted-foreground)", fontSize: 20, fontFamily: FF, marginRight: 8 }}
           >
             ₱
           </span>
@@ -273,7 +274,7 @@ function FormStep({
               outline: "none",
               background: "transparent",
               border: "none",
-              color: "#F0F6FF",
+              color: "var(--foreground)",
               fontSize: 22,
               fontWeight: 600,
               fontFamily: FF,
@@ -292,7 +293,7 @@ function FormStep({
             marginTop: 6,
           }}
         >
-          <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}>
+          <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>
             Min: ₱100 · Max: ₱50,000
           </span>
           {!isValid && amount && (
@@ -322,8 +323,8 @@ function FormStep({
           { label: "Est. Arrival", value: "~2 minutes" },
         ].map(({ label, value }) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{label}</span>
-            <span style={{ color: "#E2EEFF", fontSize: 12, fontWeight: 500, fontFamily: FF }}>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>{label}</span>
+            <span style={{ color: "var(--foreground)", fontSize: 12, fontWeight: 500, fontFamily: FF }}>
               {value}
             </span>
           </div>
@@ -347,7 +348,7 @@ function FormStep({
             : "#00A651",
           border: "none",
           cursor: isValid ? "pointer" : "not-allowed",
-          color: "#fff",
+          color: "var(--foreground)",
           fontSize: 15,
           fontWeight: 700,
           fontFamily: FF,
@@ -368,8 +369,8 @@ function FormStep({
           justifyContent: "center",
         }}
       >
-        <Lock size={10} color="#2A3F5C" />
-        <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}>
+        <Lock size={10} color="var(--muted-foreground)" />
+        <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>
           256-bit encrypted · Stellar SEP-24 compliant
         </span>
       </div>
@@ -416,7 +417,7 @@ function ProcessingStep() {
             justifyContent: "center",
           }}
         >
-          <span style={{ color: "#00A651", fontSize: 20, fontWeight: 800, fontFamily: FF }}>
+          <span style={{ color: "#00A651", fontSize: 20, fontWeight: 800, fontFamily: FF }}> {/* Accent Color */}
             G
           </span>
         </div>
@@ -425,7 +426,7 @@ function ProcessingStep() {
       <div style={{ textAlign: "center" }}>
         <div
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 17,
             fontWeight: 600,
             fontFamily: FF,
@@ -434,7 +435,7 @@ function ProcessingStep() {
         >
           Connecting to GCash...
         </div>
-        <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, lineHeight: 1.5 }}>
+        <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, lineHeight: 1.5 }}>
           Please complete the payment in your GCash app.
           <br />
           Do not close this window.
@@ -471,7 +472,7 @@ function ProcessingStep() {
           border: "1px solid rgba(0,166,81,0.18)",
         }}
       >
-        <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>
+        <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
           Step 2 of 3 — Awaiting GCash authorization
         </span>
       </div>
@@ -524,7 +525,7 @@ function SuccessStep({
         </div>
         <div
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 32,
             fontWeight: 800,
             fontFamily: FF,
@@ -534,7 +535,7 @@ function SuccessStep({
         >
           ₱{displayAmt}
         </div>
-        <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, marginTop: 6 }}>
+        <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, marginTop: 6 }}>
           ≈ {usdcAmt} USDC · arrives in ~2 minutes
         </div>
       </div>
@@ -563,8 +564,8 @@ function SuccessStep({
             key={label}
             style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
           >
-            <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{label}</span>
-            <span style={{ color: "#E2EEFF", fontSize: 12, fontWeight: 500, fontFamily: FF }}>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>{label}</span>
+            <span style={{ color: "var(--foreground)", fontSize: 12, fontWeight: 500, fontFamily: FF }}>
               {value}
             </span>
           </div>
@@ -583,7 +584,7 @@ function SuccessStep({
           background: hover ? "#1D4ED8" : "#2563EB",
           border: "none",
           cursor: "pointer",
-          color: "#fff",
+          color: "var(--foreground)",
           fontSize: 14,
           fontWeight: 600,
           fontFamily: FF,
