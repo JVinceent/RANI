@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Search, UserPlus, Send, Copy, ExternalLink } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { Search, UserPlus, Send, Copy, ExternalLink, Clock, X, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { Header } from "./Header";
 import { AddContactModal } from "./AddContactModal";
-import { addContact } from "../../lib/api";
+import { addContact, getHistory } from "../../lib/api";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -21,6 +21,7 @@ export function ContactsView() {
   const [selectedId, setSelectedId] = useState<string>(CONTACTS[0].id);
   const [copied, setCopied] = useState<string | null>(null);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   const filtered = CONTACTS.filter(
     (c) =>
@@ -98,8 +99,10 @@ export function ContactsView() {
           </div>
         </div>
 
-        {/* RIGHT PANE: Detail View */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, backgroundColor: "var(--background)" }}>
+        {/* RIGHT PANE: Detail View 
+            Added position: "relative" here so the modal stays inside! 
+        */}
+        <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, backgroundColor: "var(--background)" }}>
           {filtered.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: 400, width: "100%" }}>
               
@@ -129,17 +132,40 @@ export function ContactsView() {
                 </div>
               </div>
 
-              <button style={{ width: "100%", padding: "16px", borderRadius: 12, background: "#2563EB", border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")} onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}>
-                <Send size={16} />
-                Send Payment
-              </button>
+              {/* ACTION BUTTONS */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
+                <button style={{ width: "100%", padding: "16px", borderRadius: 12, background: "#2563EB", border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")} onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}>
+                  <Send size={16} />
+                  Send Payment
+                </button>
+
+                <button 
+                  onClick={() => setShowHistoryModal(true)}
+                  style={{ width: "100%", padding: "16px", borderRadius: 12, background: "var(--muted)", border: "1px solid var(--border)", color: "var(--foreground)", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} 
+                >
+                  <Clock size={16} />
+                  View History
+                </button>
+              </div>
             </div>
           ) : (
              <div style={{ color: "var(--muted-foreground)", fontSize: 16 }}>No contact selected</div>
           )}
+
+          {/* Contact History Modal Moved INSIDE the relative right pane */}
+          <AnimatePresence>
+            {showHistoryModal && (
+              <ContactHistoryModal
+                contactId={selectedContact.id}
+                contactName={selectedContact.name}
+                onClose={() => setShowHistoryModal(false)}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
+      {/* Add Contact Modal stays fixed globally */}
       <AnimatePresence>
         {showAddContact && (
           <AddContactModal
@@ -155,6 +181,91 @@ export function ContactsView() {
           />
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+/* ── Contact History Modal ── */
+function ContactHistoryModal({ contactId, contactName, onClose }: { contactId: string; contactName: string; onClose: () => void }) {
+  const [txs, setTxs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getHistory(contactId)
+      .then((data) => {
+        setTxs(data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [contactId]);
+
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      {/* Backdrop */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} onClick={onClose} />
+      
+      {/* Modal Box */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        style={{
+          position: "relative", /* Changed from absolute! Flexbox handles the centering now. */
+          background: "var(--card)", 
+          width: "100%", 
+          maxWidth: 500, 
+          maxHeight: "80vh",
+          borderRadius: 24, 
+          zIndex: 51, 
+          boxShadow: "0 24px 50px rgba(0,0,0,0.15)",
+          display: "flex", 
+          flexDirection: "column", 
+          border: "1px solid var(--border)"
+        }}
+      >
+        <div style={{ padding: "24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: FF, color: "var(--foreground)" }}>History with {contactName}</h3>
+          </div>
+          <button onClick={onClose} style={{ background: "var(--muted)", border: "none", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--foreground)" }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div style={{ padding: "20px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+          {loading ? (
+            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF }}>Loading history...</div>
+          ) : txs.length === 0 ? (
+            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF }}>No past transactions found.</div>
+          ) : (
+            txs.map((tx) => (
+              <div key={tx.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "var(--muted)", borderRadius: 16, border: "1px solid var(--border)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--background)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border)" }}>
+                    {tx.amount.startsWith("-") ? <ArrowUpRight size={16} color="#60A5FA" /> : <ArrowDownLeft size={16} color="#4ADE80" />}
+                  </div>
+                  <div>
+                    <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>{tx.memo || "No memo"}</div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
+                      {new Date(tx.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ color: tx.amount.startsWith("-") ? "var(--foreground)" : "#4ADE80", fontSize: 15, fontWeight: 700, fontFamily: FF }}>
+                    {tx.amount.startsWith("-") ? "" : "+"}₱{parseFloat(tx.amount).toLocaleString()}
+                  </div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, textTransform: "uppercase", marginTop: 2 }}>{tx.status}</div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
