@@ -83,8 +83,8 @@ export function NotificationsDropdown({
         width: 388,
         zIndex: 50,
         borderRadius: 18,
-        background: "rgba(9, 19, 38, 0.97)",
-        border: "1px solid rgba(255,255,255,0.09)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         backdropFilter: "blur(28px)",
         WebkitBackdropFilter: "blur(28px)",
         boxShadow:
@@ -99,13 +99,13 @@ export function NotificationsDropdown({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "16px 20px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
           <div
             style={{
-              color: "#F0F6FF",
+              color: "var(--foreground)",
               fontSize: 15,
               fontWeight: 600,
               fontFamily: FF,
@@ -171,7 +171,7 @@ export function NotificationsDropdown({
               alignItems: "center",
             }}
           >
-            <X size={14} color="#4A6080" />
+            <X size={14} color="var(--muted-foreground)" />
           </button>
         </div>
       </div>
@@ -183,7 +183,7 @@ export function NotificationsDropdown({
           return (
             <motion.div
               key={notif.id}
-              whileHover={{ background: "rgba(255,255,255,0.03)" }}
+              whileHover={{ background: "var(--muted)" }}
               style={{
                 display: "flex",
                 alignItems: "flex-start",
@@ -191,7 +191,7 @@ export function NotificationsDropdown({
                 padding: "14px 20px",
                 borderBottom:
                   i < items.length - 1
-                    ? "1px solid rgba(255,255,255,0.04)"
+                    ? "1px solid var(--border)"
                     : "none",
                 cursor: "pointer",
               }}
@@ -240,7 +240,7 @@ export function NotificationsDropdown({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
-                    color: "#7B92B0",
+                    color: "var(--muted-foreground)",
                     fontSize: 11,
                     fontFamily: FF,
                     fontWeight: 600,
@@ -253,7 +253,7 @@ export function NotificationsDropdown({
                 </div>
                 <div
                   style={{
-                    color: notif.unread ? "#E2EEFF" : "#7B92B0",
+                    color: notif.unread ? "var(--foreground)" : "var(--muted-foreground)",
                     fontSize: 13,
                     fontFamily: FF,
                     fontWeight: notif.unread ? 500 : 400,
@@ -266,7 +266,7 @@ export function NotificationsDropdown({
                 </div>
                 <div
                   style={{
-                    color: "#3A5070",
+                    color: "var(--muted-foreground)",
                     fontSize: 11,
                     fontFamily: FF,
                   }}
@@ -283,7 +283,7 @@ export function NotificationsDropdown({
       <div
         style={{
           padding: "12px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
+          borderTop: "1px solid var(--border)",
           textAlign: "center",
         }}
       >
@@ -292,13 +292,13 @@ export function NotificationsDropdown({
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 12,
             fontFamily: FF,
             transition: "color 150ms",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#4A6080")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--foreground)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
         >
           View all notifications
         </button>
@@ -342,12 +342,10 @@ export function NotificationBell({
               width: 36,
               height: 36,
               borderRadius: 9,
-              background: open
-                ? "rgba(37,99,235,0.14)"
-                : "rgba(255,255,255,0.05)",
+              background: "var(--muted)",
               border: open
                 ? "1px solid rgba(37,99,235,0.3)"
-                : "1px solid rgba(255,255,255,0.07)",
+                : "1px solid var(--border)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -355,7 +353,7 @@ export function NotificationBell({
               transition: "all 150ms",
             }}
           >
-            <Bell size={16} color={open ? "#60A5FA" : "#7B92B0"} strokeWidth={1.8} />
+            <Bell size={16} color={open ? "#60A5FA" : "var(--muted-foreground)"} strokeWidth={1.8} />
           </button>
 
           {/* Badge */}
@@ -369,7 +367,7 @@ export function NotificationBell({
                 height: 16,
                 borderRadius: "50%",
                 background: "#EF4444",
-                border: "2px solid #090F1D",
+                border: "2px solid var(--background)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

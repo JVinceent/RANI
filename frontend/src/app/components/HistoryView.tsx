@@ -36,24 +36,24 @@ export function HistoryView() {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#090F1D" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--background)", color: "var(--foreground)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
       <Header />
 
       {/* Toolbar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
         <div>
-          <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Transaction History</div>
-          <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{TXS.length} transactions · All time</div>
+          <div style={{ color: "var(--foreground)", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Transaction History</div>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{TXS.length} transactions · All time</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", width: 210 }}>
-            <Search size={13} color="#4A6080" />
+          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "var(--muted)", border: "1px solid var(--border)", width: 210 }}>
+            <Search size={13} color="var(--muted-foreground)" />
             <input
               type="text"
               placeholder="Search transactions…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "#E2EEFF", fontSize: 13, fontFamily: FF }}
+              style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "var(--foreground)", fontSize: 13, fontFamily: FF }}
             />
           </div>
           {/* Filter button — wired to dropdown */}
@@ -71,17 +71,17 @@ export function HistoryView() {
                 borderRadius: 10, padding: "8px 12px",
                 background: showFilter
                   ? "rgba(37,99,235,0.12)"
-                  : "rgba(255,255,255,0.04)",
+                  : "var(--muted)",
                 border: showFilter
                   ? "1px solid rgba(37,99,235,0.3)"
-                  : "1px solid rgba(255,255,255,0.07)",
+                  : "1px solid var(--border)",
                 cursor: "pointer",
-                color: showFilter ? "#60A5FA" : "#4A6080",
+                color: showFilter ? "#60A5FA" : "var(--muted-foreground)",
                 fontSize: 13, fontFamily: FF,
                 transition: "all 150ms",
               }}
             >
-              <Filter size={13} color={showFilter ? "#60A5FA" : "#4A6080"} />
+              <Filter size={13} color={showFilter ? "#60A5FA" : "var(--muted-foreground)"} />
               Filter
             </button>
             <AnimatePresence>
@@ -97,14 +97,14 @@ export function HistoryView() {
       </div>
 
       {/* Summary stats */}
-      <div style={{ display: "flex", gap: 10, padding: "14px 28px", flexShrink: 0, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ display: "flex", gap: 10, padding: "14px 28px", flexShrink: 0, borderBottom: "1px solid var(--border)" }}>
         {[
-          { label: "Total Sent", value: `−₱${totalSent.toLocaleString()}`, color: "#F0F6FF" },
+          { label: "Total Sent", value: `−₱${totalSent.toLocaleString()}`, color: "var(--foreground)" },
           { label: "Total Received", value: `+₱${totalReceived.toLocaleString()}`, color: "#4ADE80" },
           { label: "Net", value: `${totalReceived - totalSent >= 0 ? "+" : "−"}₱${Math.abs(totalReceived - totalSent).toLocaleString()}`, color: totalReceived - totalSent >= 0 ? "#4ADE80" : "#F87171" },
         ].map(({ label, value, color }) => (
-          <div key={label} style={{ padding: "10px 16px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", minWidth: 136 }}>
-            <div style={{ color: "#3A5070", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+          <div key={label} style={{ padding: "10px 16px", borderRadius: 10, background: "var(--muted)", border: "1px solid var(--border)", minWidth: 136 }}>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
               {label}
             </div>
             <div style={{ color, fontSize: 18, fontWeight: 700, fontFamily: FF, letterSpacing: "-0.01em" }}>{value}</div>
@@ -115,7 +115,7 @@ export function HistoryView() {
       {/* Column headers */}
       <div style={{ display: "grid", gridTemplateColumns: "130px 1.8fr 110px 1fr 100px", padding: "10px 28px", flexShrink: 0 }}>
         {["Date", "Recipient", "Amount", "Memo", "Status"].map((col) => (
-          <div key={col} style={{ color: "#2A3F5C", fontSize: 10, fontWeight: 700, fontFamily: FF, letterSpacing: "0.09em", textTransform: "uppercase" }}>
+          <div key={col} style={{ color: "var(--muted-foreground)", fontSize: 10, fontWeight: 700, fontFamily: FF, letterSpacing: "0.09em", textTransform: "uppercase" }}>
             {col}
           </div>
         ))}
@@ -132,23 +132,23 @@ export function HistoryView() {
               alignItems: "center",
               padding: "12px 8px",
               borderRadius: 12,
-              background: hovered === tx.id ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.025)",
-              border: `1px solid ${hovered === tx.id ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.04)"}`,
+              background: hovered === tx.id ? "var(--muted)" : "transparent",
+              border: `1px solid ${hovered === tx.id ? "rgba(37,99,235,0.15)" : "var(--border)"}`,
               transition: "all 150ms",
             }}
             onMouseEnter={() => setHovered(tx.id)}
             onMouseLeave={() => setHovered(null)}
           >
             {/* Date */}
-            <div style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{tx.date}</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>{tx.date}</div>
 
             {/* Recipient */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ position: "relative" }}>
-                <div style={{ width: 34, height: 34, borderRadius: "50%", background: tx.avatarBg, border: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 34, height: 34, borderRadius: "50%", background: tx.avatarBg, border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ color: tx.avatarColor, fontSize: 11, fontWeight: 700, fontFamily: FF }}>{tx.initials}</span>
                 </div>
-                <div style={{ position: "absolute", bottom: -2, right: -2, width: 14, height: 14, borderRadius: "50%", background: tx.type === "received" ? "rgba(34,197,94,0.15)" : "rgba(37,99,235,0.15)", border: "1px solid #090F1D", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "absolute", bottom: -2, right: -2, width: 14, height: 14, borderRadius: "50%", background: tx.type === "received" ? "rgba(34,197,94,0.15)" : "rgba(37,99,235,0.15)", border: "1px solid var(--background)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {tx.type === "received"
                     ? <ArrowDownLeft size={7} color="#4ADE80" strokeWidth={2.5} />
                     : <ArrowUpRight size={7} color="#60A5FA" strokeWidth={2.5} />
@@ -156,18 +156,18 @@ export function HistoryView() {
                 </div>
               </div>
               <div>
-                <div style={{ color: "#E2EEFF", fontSize: 13, fontWeight: 500, fontFamily: FF }}>{tx.name}</div>
-                <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF }}>{tx.type === "received" ? "from" : "to"} · Stellar</div>
+                <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 500, fontFamily: FF }}>{tx.name}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 10, fontFamily: FF }}>{tx.type === "received" ? "from" : "to"} · Stellar</div>
               </div>
             </div>
 
             {/* Amount */}
-            <div style={{ color: tx.type === "received" ? "#4ADE80" : "#F0F6FF", fontSize: 13, fontWeight: 600, fontFamily: FF }}>
+            <div style={{ color: tx.type === "received" ? "#4ADE80" : "var(--foreground)", fontSize: 13, fontWeight: 600, fontFamily: FF }}>
               {tx.type === "received" ? "+" : "−"}₱{tx.amount.toLocaleString()}
             </div>
 
             {/* Memo */}
-            <div style={{ color: "#4A6080", fontSize: 12, fontFamily: FF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {tx.memo}
             </div>
 

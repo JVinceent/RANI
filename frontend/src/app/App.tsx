@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AuthView } from "./components/AuthView";
 import { OnboardingView } from "./components/OnboardingView";
 import { Sidebar, type AppView } from "./components/Sidebar";
@@ -9,6 +9,7 @@ import { VoiceListeningView } from "./components/VoiceListeningView";
 import { FullSettingsView } from "./components/FullSettingsView";
 import { useWallet } from "../hooks/useWallet";
 import { connectFreighter, saveName } from "../lib/api";
+
 
 const FF = "'DM Sans', sans-serif";
 
@@ -21,6 +22,14 @@ export default function App() {
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
 
   const handleConnect = async () => {
     setAuthError(null);
@@ -94,12 +103,19 @@ export default function App() {
         display: "flex",
         width: "100vw",
         height: "100vh",
-        background: "#060C18",
+        background: "var(--background)",
+        color: "var(--foreground)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
         fontFamily: FF,
         overflow: "hidden",
       }}
     >
-      <Sidebar activeView={activeView} onNavigate={setActiveView} />
+      <Sidebar 
+        activeView={activeView} 
+        onNavigate={setActiveView} 
+        isDarkMode={isDarkMode} 
+        toggleTheme={() => setIsDarkMode(!isDarkMode)} 
+      />
 
       <div
         style={{

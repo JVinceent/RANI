@@ -10,8 +10,10 @@ export function Header() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 28px",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid var(--border)",
         flexShrink: 0,
+        background: "var(--card)",
+        transition: "background-color 0.3s ease, border-color 0.3s ease",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -32,7 +34,7 @@ export function Header() {
         <div>
           <div
             style={{
-              color: "#F0F6FF",
+              color: "var(--foreground)",
               fontSize: 14,
               fontWeight: 600,
               fontFamily: FF,
@@ -52,7 +54,7 @@ export function Header() {
                 boxShadow: "0 0 7px rgba(34,197,94,0.65)",
               }}
             />
-            <span style={{ color: "#4A6080", fontSize: 11, fontFamily: FF }}>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>
               Online
             </span>
           </div>

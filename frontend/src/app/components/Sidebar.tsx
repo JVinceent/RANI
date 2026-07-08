@@ -7,6 +7,8 @@ import {
   Wallet,
   Bell,
   Mic,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { NotificationsDropdown } from "./NotificationsDropdown";
@@ -23,6 +25,8 @@ export type AppView =
 interface SidebarProps {
   activeView: AppView;
   onNavigate: (view: AppView) => void;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
 }
 
 const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
@@ -32,7 +36,7 @@ const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
   { id: "voice", icon: Mic, label: "Voice" },
 ];
 
-export function Sidebar({ activeView, onNavigate }: SidebarProps) {
+export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme }: SidebarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
 
@@ -46,14 +50,15 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
       <aside
         style={{
           width: 68,
-          background: "#060C18",
-          borderRight: "1px solid rgba(255,255,255,0.05)",
+          background: "var(--sidebar)",
+          borderRight: "1px solid var(--sidebar-border)",
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
           height: "100%",
           position: "relative",
           zIndex: 1,
+          transition: "background-color 0.3s ease, border-color 0.3s ease",
         }}
       >
         {/* Brand */}
@@ -97,7 +102,7 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
         <div
           style={{
             height: 1,
-            background: "rgba(255,255,255,0.05)",
+            background: "var(--sidebar-border)",
             margin: "0 12px 12px",
           }}
         />
@@ -154,12 +159,14 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
                 )}
                 <Icon
                   size={18}
-                  color={active ? "#60A5FA" : "rgba(255,255,255,0.26)"}
+                  color={active ? "#2563EB" : "var(--sidebar-foreground)"}
+                  style={{ opacity: active ? 1 : 0.5 }}
                   strokeWidth={active ? 2 : 1.5}
                 />
                 <span
                   style={{
-                    color: active ? "#60A5FA" : "rgba(255,255,255,0.18)",
+                    color: active ? "#2563EB" : "var(--sidebar-foreground)",
+                    opacity: active ? 1 : 0.4,
                     fontSize: 9,
                     fontFamily: FF,
                     fontWeight: 500,
@@ -183,6 +190,26 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
             padding: "0 8px 16px",
           }}
         >
+        {/* THEME TOGGLE BUTTON */}
+        <button
+          onClick={toggleTheme}
+          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          style={{
+            width: 52,
+            height: 40,
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            transition: "all 150ms",
+            color: "var(--sidebar-foreground)",
+          }}
+        >
+          {isDarkMode ? <Sun size={17} style={{ opacity: 0.5 }} strokeWidth={1.5} /> : <Moon size={17} style={{ opacity: 0.6 }} strokeWidth={1.5} />}
+        </button>
           {/* ── Bell  →  notifications overlay ── */}
           <div style={{ position: "relative" }}>
             <button
@@ -207,9 +234,8 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
             >
               <Bell
                 size={17}
-                color={
-                  showNotifications ? "#60A5FA" : "rgba(255,255,255,0.22)"
-                }
+                color={showNotifications ? "#2563EB" : "var(--sidebar-foreground)"}
+                style={{ opacity: showNotifications ? 1 : 0.5 }}
                 strokeWidth={showNotifications ? 2 : 1.5}
               />
             </button>
@@ -225,7 +251,7 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
                   height: 16,
                   borderRadius: "50%",
                   background: "#EF4444",
-                  border: "2px solid #060C18",
+                  border:  "2px solid var(--sidebar)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -272,11 +298,8 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
           >
             <Settings
               size={17}
-              color={
-                activeView === "settings"
-                  ? "#60A5FA"
-                  : "rgba(255,255,255,0.22)"
-              }
+              color={activeView === "settings" ? "#2563EB" : "var(--sidebar-foreground)"}
+              style={{ opacity: activeView === "settings" ? 1 : 0.5 }}
               strokeWidth={activeView === "settings" ? 2 : 1.5}
             />
           </button>

@@ -124,24 +124,24 @@ export function ContactsView() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#090F1D" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--background)", color: "var(--foreground)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
       <Header />
 
       {/* Toolbar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
         <div>
-          <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Contacts</div>
-          <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{contacts.length} saved on Stellar</div>
+          <div style={{ color: "var(--foreground)", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Contacts</div>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{contacts.length} saved on Stellar</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", width: 220 }}>
-            <Search size={13} color="#4A6080" />
+          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "var(--muted)", border: "1px solid var(--border)", width: 220 }}>
+            <Search size={13} color="var(--muted-foreground)" />
             <input
               type="text"
               placeholder="Search contacts…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "#E2EEFF", fontSize: 13, fontFamily: FF }}
+              style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "var(--foreground)", fontSize: 13, fontFamily: FF }}
             />
           </div>
           <button
@@ -159,7 +159,7 @@ export function ContactsView() {
       {/* Column headers */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 2.6fr 1fr 1fr 80px", padding: "10px 28px", flexShrink: 0 }}>
         {["Contact", "Stellar Address", "Tag", "Last Sent", ""].map((col) => (
-          <div key={col} style={{ color: "#2A3F5C", fontSize: 10, fontWeight: 700, fontFamily: FF, letterSpacing: "0.09em", textTransform: "uppercase" }}>
+          <div key={col} style={{ color: "var(--muted-foreground)", fontSize: 10, fontWeight: 700, fontFamily: FF, letterSpacing: "0.09em", textTransform: "uppercase" }}>
             {col}
           </div>
         ))}
@@ -176,8 +176,8 @@ export function ContactsView() {
               alignItems: "center",
               padding: "13px 8px",
               borderRadius: 12,
-              background: hovered === c.id ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.025)",
-              border: `1px solid ${hovered === c.id ? "rgba(37,99,235,0.18)" : "rgba(255,255,255,0.04)"}`,
+              background: hovered === c.id ? "var(--muted)" : "transparent",
+              border: `1px solid ${hovered === c.id ? "rgba(37,99,235,0.18)" : "var(--border)"}`,
               transition: "all 150ms",
               cursor: "default",
             }}
@@ -186,18 +186,18 @@ export function ContactsView() {
           >
             {/* Avatar + name */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 38, height: 38, borderRadius: "50%", background: c.avatarBg, border: "1.5px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: "50%", background: c.avatarBg, border: "1.5px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <span style={{ color: c.avatarColor, fontSize: 12, fontWeight: 700, fontFamily: FF }}>{c.initials}</span>
               </div>
               <div>
-                <div style={{ color: "#E2EEFF", fontSize: 13, fontWeight: 600, fontFamily: FF }}>{c.name}</div>
-                <div style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}>{c.handle}</div>
+                <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 600, fontFamily: FF }}>{c.name}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>{c.handle}</div>
               </div>
             </div>
 
             {/* Address */}
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ color: "#4A6080", fontSize: 11, fontFamily: "monospace", background: "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.05)" }}>
+              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "monospace", background: "var(--muted)", padding: "2px 8px", borderRadius: 5, border: "1px solid var(--border)" }}>
                 {c.address.slice(0, 8)}...{c.address.slice(-6)}
               </span>
               <button
@@ -205,10 +205,10 @@ export function ContactsView() {
                 title="Copy"
                 style={{ width: 24, height: 24, borderRadius: 6, background: copied === c.id ? "rgba(34,197,94,0.08)" : "transparent", border: copied === c.id ? "1px solid rgba(34,197,94,0.2)" : "1px solid transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}
               >
-                <Copy size={11} color={copied === c.id ? "#4ADE80" : "#4A6080"} />
+                <Copy size={11} color={copied === c.id ? "#4ADE80" : "var(--muted-foreground)"} />
               </button>
               <a href="#" title="Explorer" style={{ width: 24, height: 24, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
-                <ExternalLink size={11} color="#4A6080" />
+                <ExternalLink size={11} color="var(--muted-foreground)" />
               </a>
             </div>
 
@@ -219,12 +219,12 @@ export function ContactsView() {
                   {c.tag}
                 </span>
               ) : (
-                <span style={{ color: "#1A2B40", fontSize: 12, fontFamily: FF }}>—</span>
+                <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>—</span>
               )}
             </div>
 
             {/* Last sent */}
-            <div style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{c.lastSent}</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>{c.lastSent}</div>
 
             {/* Send */}
             <div style={{ display: "flex", justifyContent: "flex-end", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
@@ -237,7 +237,7 @@ export function ContactsView() {
         ))}
 
         {loading && (
-          <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, padding: "40px 0", textAlign: "center" }}>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, padding: "40px 0", textAlign: "center" }}>
             Loading contacts…
           </div>
         )}
@@ -251,10 +251,10 @@ export function ContactsView() {
         {filtered.length === 0 && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 12 }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Search size={22} color="#2A3F5C" />
+              <Search size={22} color="var(--muted-foreground)" />
             </div>
-            <div style={{ color: "#E2EEFF", fontSize: 15, fontWeight: 600, fontFamily: FF }}>No contacts found</div>
-            <div style={{ color: "#2A3F5C", fontSize: 13, fontFamily: FF }}>Try a different search term.</div>
+            <div style={{ color: "var(--foreground)", fontSize: 15, fontWeight: 600, fontFamily: FF }}>No contacts found</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF }}>Try a different search term.</div>
           </div>
         )}
       </div>

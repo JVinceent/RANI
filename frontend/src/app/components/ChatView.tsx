@@ -20,9 +20,9 @@ const FF = "'DM Sans', sans-serif";
 const pillButtonStyle: CSSProperties = {
   padding: "8px 16px",
   borderRadius: 9,
-  background: "rgba(255,255,255,0.06)",
+  background: "var(--border)",
   border: "1px solid rgba(255,255,255,0.12)",
-  color: "#E2EEFF",
+  color: "var(--foreground)",
   fontSize: 13,
   fontFamily: FF,
   cursor: "pointer",
@@ -146,7 +146,7 @@ export function ChatView({ userName }: { userName: string }) {
         particleCount: 220,
         spread: 105,
         origin: { y: 0.52 },
-        colors: ["#2563EB", "#60A5FA", "#22C55E", "#4ADE80", "#F0F6FF", "#FCD34D"],
+        colors: ["#2563EB", "#60A5FA", "#22C55E", "#4ADE80", "var(--foreground)", "#FCD34D"],
       });
       setTimeout(() => {
         confetti({
@@ -357,7 +357,7 @@ if (awaiting === "amount") {
         flexDirection: "column",
         height: "100%",
         position: "relative",
-        background: "#080E1C",
+        background: "var(--background)",
       }}
     >
       <Header />
@@ -509,7 +509,7 @@ if (awaiting === "amount") {
               outline: "none",
               background: "transparent",
               border: "none",
-              color: "#E2EEFF",
+              color: "var(--foreground)",
               fontSize: 14,
               fontFamily: FF,
             }}
@@ -553,7 +553,7 @@ if (awaiting === "amount") {
             textAlign: "center",
             marginTop: 8,
             marginBottom: 0,
-            color: "#1A2B40",
+            color: "var(--muted-foreground)",
             fontSize: 11,
             fontFamily: FF,
           }}
@@ -624,7 +624,7 @@ function LandingState({
             width: 78,
             height: 78,
             borderRadius: "50%",
-            background: "#080E1C",
+            background: "var(--background)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -637,7 +637,7 @@ function LandingState({
       <div style={{ textAlign: "center", maxWidth: 500 }}>
         <div
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 36,
             fontWeight: 700,
             fontFamily: FF,
@@ -649,7 +649,7 @@ function LandingState({
         </div>
         <div
           style={{
-            color: "#4A6080",
+            color: "var(--muted-foreground)",
             fontSize: 15,
             fontFamily: FF,
             marginTop: 12,
@@ -736,9 +736,9 @@ function QuickPill({
       color: "#60A5FA",
     },
     ghost: {
-      background: hover ? "rgba(255,255,255,0.06)" : "transparent",
-      border: "1.5px solid rgba(255,255,255,0.1)",
-      color: "#7B92B0",
+      background: hover ? "var(--muted)" : "transparent",
+      border: "1.5px solid var(--border)",
+      color: "var(--muted-foreground)",
     },
   };
 
@@ -905,7 +905,7 @@ function DisambiguationBlock({
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <AIChatBubble>
         I found{" "}
-        <span style={{ color: "#E2EEFF", fontWeight: 600 }}>{candidates.length} contacts</span>{" "}
+        <span style={{ color: "var(--foreground)", fontWeight: 600 }}>{candidates.length} contacts</span>{" "}
         — which one do you mean?
       </AIChatBubble>
 
@@ -959,14 +959,14 @@ function DisambiguationBlock({
                 </span>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ color: "#F0F6FF", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
+                <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>
                   {contact.name}
                 </div>
-                <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
                   {contact.address.slice(0, 6)}...{contact.address.slice(-4)}
                 </div>
               </div>
-              <ArrowRight size={16} color={isHovered ? color : "#2A3F5C"} />
+              <ArrowRight size={16} color={isHovered ? color : "var(--muted-foreground)"} />
             </motion.button>
           );
         })}
@@ -1010,8 +1010,8 @@ function SummaryBlock({
         style={{
           borderRadius: 18,
           overflow: "hidden",
-          background: "#0C1929",
-          border: "1px solid rgba(255,255,255,0.07)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           width: 480,
         }}
       >
@@ -1027,7 +1027,7 @@ function SummaryBlock({
             <div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 10,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1040,7 +1040,7 @@ function SummaryBlock({
               </div>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 30,
                   fontWeight: 700,
                   fontFamily: FF,
@@ -1052,7 +1052,7 @@ function SummaryBlock({
               </div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 11,
                   fontFamily: FF,
                   marginTop: 3,
@@ -1080,7 +1080,7 @@ function SummaryBlock({
           <div
             style={{
               height: 1,
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--border)",
               marginBottom: 18,
             }}
           />
@@ -1096,7 +1096,7 @@ function SummaryBlock({
             <div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 10,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1135,7 +1135,7 @@ function SummaryBlock({
                 <div>
                   <div
                     style={{
-                      color: "#E2EEFF",
+                      color: "var(--foreground)",
                       fontSize: 14,
                       fontWeight: 600,
                       fontFamily: FF,
@@ -1145,7 +1145,7 @@ function SummaryBlock({
                   </div>
                   <div
                     style={{
-                      color: "#2A3F5C",
+                      color: "var(--muted-foreground)",
                       fontSize: 11,
                       fontFamily: "monospace",
                       marginTop: 1,
@@ -1159,7 +1159,7 @@ function SummaryBlock({
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 10,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1288,7 +1288,7 @@ function ConfirmModal({
           <div>
             <div
               style={{
-                color: "#F0F6FF",
+                color: "var(--foreground)",
                 fontSize: 16,
                 fontWeight: 600,
                 fontFamily: FF,
@@ -1325,7 +1325,7 @@ function ConfirmModal({
             justifyContent: "center",
           }}
         >
-          <X size={14} color="#4A6080" />
+          <X size={14} color="var(--muted-foreground)" />
         </button>
       </div>
 
@@ -1345,7 +1345,7 @@ function ConfirmModal({
           <div>
             <div
               style={{
-                color: "#3A5070",
+                color: "var(--muted-foreground)",
                 fontSize: 9,
                 fontFamily: FF,
                 fontWeight: 700,
@@ -1358,7 +1358,7 @@ function ConfirmModal({
             </div>
             <div
               style={{
-                color: "#F0F6FF",
+                color: "var(--foreground)",
                 fontSize: 28,
                 fontWeight: 700,
                 fontFamily: FF,
@@ -1369,11 +1369,11 @@ function ConfirmModal({
               ₱{amount}
             </div>
           </div>
-          <ArrowRight size={20} color="#2A3F5C" />
+          <ArrowRight size={20} color="var(--muted-foreground)" />
           <div style={{ textAlign: "right" }}>
             <div
               style={{
-                color: "#3A5070",
+                color: "var(--muted-foreground)",
                 fontSize: 9,
                 fontFamily: FF,
                 fontWeight: 700,
@@ -1418,13 +1418,13 @@ function ConfirmModal({
                   : "none",
             }}
           >
-            <span style={{ color: "#4A6080", fontSize: 13, fontFamily: FF }}>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF }}>
               {label}
             </span>
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#E2EEFF",
+                  color: "var(--foreground)",
                   fontSize: 13,
                   fontWeight: 500,
                   fontFamily: FF,
@@ -1435,7 +1435,7 @@ function ConfirmModal({
               {sub && (
                 <div
                   style={{
-                    color: "#2A3F5C",
+                    color: "var(--muted-foreground)",
                     fontSize: 11,
                     fontFamily: FF,
                   }}
@@ -1518,13 +1518,13 @@ function ConfirmModal({
               background: "transparent",
               border: "none",
               cursor: "pointer",
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 13,
               fontFamily: FF,
               transition: "color 150ms",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
           >
             Cancel
           </button>
@@ -1547,7 +1547,7 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
         style={{
           borderRadius: 18,
           overflow: "hidden",
-          background: "#0C1929",
+          background: "var(--card)",
           border: "1px solid rgba(34,197,94,0.24)",
           boxShadow: "0 0 48px rgba(34,197,94,0.08)",
           width: 480,
@@ -1594,7 +1594,7 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
             </div>
             <div
               style={{
-                color: "#4A6080",
+                color: "var(--muted-foreground)",
                 fontSize: 12,
                 fontFamily: FF,
                 marginTop: 1,
@@ -1617,7 +1617,7 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
             <div>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 9,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1630,7 +1630,7 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
               </div>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 24,
                   fontWeight: 700,
                   fontFamily: FF,
@@ -1645,7 +1645,7 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#3A5070",
+                  color: "var(--muted-foreground)",
                   fontSize: 9,
                   fontFamily: FF,
                   fontWeight: 700,
@@ -1674,7 +1674,7 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
           <div
             style={{
               height: 1,
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--border)",
               marginBottom: 14,
             }}
           />
@@ -1700,13 +1700,13 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
                 }}
               >
                 <span
-                  style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}
+                  style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}
                 >
                   {label}
                 </span>
                 <span
                   style={{
-                    color: "#E2EEFF",
+                    color: "var(--foreground)",
                     fontSize: 12,
                     fontWeight: 500,
                     fontFamily: mono ? "monospace" : FF,
@@ -1768,13 +1768,13 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
               background: "transparent",
               border: "none",
               cursor: "pointer",
-              color: "#3A5070",
+              color: "var(--muted-foreground)",
               fontSize: 12,
               fontFamily: FF,
               transition: "color 150ms",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
           >
             ↩ Try another transaction
           </button>
@@ -1815,14 +1815,14 @@ function AIChatBubble({ children }: { children: ReactNode }) {
       style={{
         padding: "10px 15px",
         borderRadius: "14px 14px 14px 4px",
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "var(--muted)",
+        border: "1px solid var(--border)",
         maxWidth: 420,
       }}
     >
       <p
         style={{
-          color: "#7B92B0",
+          color: "var(--muted-foreground)",
           fontSize: 14,
           fontFamily: FF,
           lineHeight: 1.6,
@@ -1843,7 +1843,7 @@ function DateSep({ label }: { label: string }) {
       />
       <span
         style={{
-          color: "#2A3F5C",
+          color: "var(--muted-foreground)",
           fontSize: 11,
           fontFamily: FF,
           fontWeight: 500,
@@ -1882,7 +1882,7 @@ const PORTFOLIO_ASSETS = [
     label: "Stellar Lumens",
     balance: "1,420 XLM",
     iconBg: "rgba(255,255,255,0.1)",
-    iconText: "#F0F6FF",
+    iconText: "var(--foreground)",
     change: "+2.1%",
     positive: true,
   },
@@ -1948,7 +1948,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
       style={{
         borderRadius: 18,
         overflow: "hidden",
-        background: "#0C1929",
+        background: "var(--card)",
         border: "1px solid rgba(255,255,255,0.07)",
         width: 480,
       }}
@@ -1963,7 +1963,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
       >
         <div
           style={{
-            color: "#3A5070",
+            color: "var(--muted-foreground)",
             fontSize: 10,
             fontFamily: FF,
             fontWeight: 700,
@@ -1976,7 +1976,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
         </div>
         <div
           style={{
-            color: "#F0F6FF",
+            color: "var(--foreground)",
             fontSize: 32,
             fontWeight: 700,
             fontFamily: FF,
@@ -2005,7 +2005,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
           >
             ↑ +2.4%
           </span>
-          <span style={{ color: "#3A5070", fontSize: 12, fontFamily: FF }}>
+          <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>
             24h · Last updated just now
           </span>
         </div>
@@ -2054,7 +2054,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
             <div style={{ flex: 1 }}>
               <div
                 style={{
-                  color: "#E2EEFF",
+                  color: "var(--foreground)",
                   fontSize: 13,
                   fontWeight: 600,
                   fontFamily: FF,
@@ -2063,7 +2063,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
                 {asset.name}
               </div>
               <div
-                style={{ color: "#3A5070", fontSize: 11, fontFamily: FF }}
+                style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}
               >
                 {asset.label}
               </div>
@@ -2072,7 +2072,7 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  color: "#F0F6FF",
+                  color: "var(--foreground)",
                   fontSize: 14,
                   fontWeight: 600,
                   fontFamily: FF,
@@ -2110,13 +2110,13 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "#3A5070",
+            color: "var(--muted-foreground)",
             fontSize: 12,
             fontFamily: FF,
             transition: "color 150ms",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted-foreground)")}
         >
           ↩ Back
         </button>
