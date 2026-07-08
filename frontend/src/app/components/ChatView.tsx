@@ -438,46 +438,6 @@ if (awaiting === "amount") {
           )}
         </AnimatePresence>
 
-        <AnimatePresence>
-          {state === "confirm" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                zIndex: 30,
-                background: "rgba(3,6,14,0.85)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 16 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-              >
-                <ConfirmModal
-                  recipient={resolvedContact!}
-                  amount={amount!}
-                  memo={memo}  
-                  feeXLM={feeXLM}
-                  confirming={confirming}
-                  preparing={preparing}
-                  error={confirmError}
-                  onConfirm={handleConfirm}
-                  onCancel={() => go("summary")}
-                />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       <div
@@ -564,6 +524,50 @@ if (awaiting === "amount") {
 
       <AnimatePresence>
         {showSEP24 && <SEP24Modal onClose={() => setShowSEP24(false)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {state === "confirm" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 30,
+              background: "rgba(3,6,14,0.85)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "32px 24px",
+              overflowY: "auto",
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              style={{ margin: "auto" }}
+            >
+              <ConfirmModal
+                recipient={resolvedContact!}
+                amount={amount!}
+                memo={memo}
+                feeXLM={feeXLM}
+                confirming={confirming}
+                preparing={preparing}
+                error={confirmError}
+                onConfirm={handleConfirm}
+                onCancel={() => go("summary")}
+              />
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
@@ -934,8 +938,8 @@ function DisambiguationBlock({
                 gap: 14,
                 padding: "15px 18px",
                 borderRadius: 14,
-                background: isHovered ? `${color}18` : "rgba(255,255,255,0.04)",
-                border: `1.5px solid ${isHovered ? `${color}66` : "rgba(255,255,255,0.08)"}`,
+                background: isHovered ? `${color}18` : "var(--muted)",
+                border: `1.5px solid ${isHovered ? `${color}66` : "var(--border)"}`,
                 cursor: "pointer",
                 textAlign: "left",
                 transition: "background 150ms, border-color 150ms",
@@ -1254,8 +1258,8 @@ function ConfirmModal({
       style={{
         width: 480,
         borderRadius: 22,
-        background: "#0D1929",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         boxShadow:
           "0 40px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(37,99,235,0.07)",
         overflow: "hidden",
@@ -1317,8 +1321,8 @@ function ConfirmModal({
             width: 30,
             height: 30,
             borderRadius: 9,
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "var(--muted)",
+            border: "1px solid var(--border)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -1414,7 +1418,7 @@ function ConfirmModal({
               padding: "9px 0",
               borderBottom:
                 i < arr.length - 1
-                  ? "1px solid rgba(255,255,255,0.04)"
+                  ? "1px solid var(--border)"
                   : "none",
             }}
           >
@@ -1466,7 +1470,7 @@ function ConfirmModal({
           />
           <p
             style={{
-              color: "#92400E",
+              color: "#B45309",
               fontSize: 12,
               fontFamily: FF,
               lineHeight: 1.55,

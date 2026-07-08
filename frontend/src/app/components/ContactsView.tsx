@@ -1,22 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, UserPlus, Send, Copy, ExternalLink } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import { Search, UserPlus, Send, Copy, ExternalLink, Clock, X, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { Header } from "./Header";
 import { AddContactModal } from "./AddContactModal";
-import { addContact, getContacts, streamContacts, type Contact } from "../../lib/api";
-
+import { addContact, getContacts, getHistory, streamContacts, type Contact } from "../../lib/api";
 
 const FF = "'DM Sans', sans-serif";
 
 // Deterministic palette so the same contact always gets the same
 // avatar/tag color across reloads, instead of it changing every fetch.
 const PALETTE = [
-  { color: "#EC4899", bg: "rgba(236,72,153,0.1)" },
-  { color: "#F97316", bg: "rgba(249,115,22,0.1)" },
-  { color: "#4ADE80", bg: "rgba(34,197,94,0.1)" },
-  { color: "#FCD34D", bg: "rgba(245,158,11,0.1)" },
-  { color: "#C4B5FD", bg: "rgba(139,92,246,0.1)" },
-  { color: "#60A5FA", bg: "rgba(37,99,235,0.12)" },
+  { color: "#EC4899", bg: "rgba(236,72,153,0.15)" },
+  { color: "#F97316", bg: "rgba(249,115,22,0.15)" },
+  { color: "#4ADE80", bg: "rgba(34,197,94,0.15)" },
+  { color: "#FCD34D", bg: "rgba(245,158,11,0.15)" },
+  { color: "#A78BFA", bg: "rgba(139,92,246,0.15)" },
+  { color: "#60A5FA", bg: "rgba(37,99,235,0.15)" },
 ];
 
 function colorFor(seed: string) {
@@ -68,9 +67,10 @@ export function ContactsView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
@@ -89,33 +89,48 @@ export function ContactsView() {
     loadContacts();
   }, [loadContacts]);
 
+  // Live updates — Supabase realtime pushed through the backend SSE stream.
   useEffect(() => {
-  const unsubscribe = streamContacts((eventType, payload) => {
-    setContacts((prev) => {
-      if (eventType === "INSERT") {
-        const incoming = toDisplay(payload.new as Contact);
-        if (prev.some((c) => c.id === incoming.id)) return prev; // dedupe
-        return [...prev, incoming];
-      }
-      if (eventType === "UPDATE") {
-        const updated = toDisplay(payload.new as Contact);
-        return prev.map((c) => (c.id === updated.id ? updated : c));
-      }
-      if (eventType === "DELETE") {
-        return prev.filter((c) => c.id !== payload.old.id);
-      }
-      return prev;
+    const unsubscribe = streamContacts((eventType, payload) => {
+      setContacts((prev) => {
+        if (eventType === "INSERT") {
+          const incoming = toDisplay(payload.new as Contact);
+          if (prev.some((c) => c.id === incoming.id)) return prev; // dedupe
+          return [...prev, incoming];
+        }
+        if (eventType === "UPDATE") {
+          const updated = toDisplay(payload.new as Contact);
+          return prev.map((c) => (c.id === updated.id ? updated : c));
+        }
+        if (eventType === "DELETE") {
+          return prev.filter((c) => c.id !== payload.old.id);
+        }
+        return prev;
+      });
     });
-  });
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
+
+  // Keep a contact selected once the list loads, and fall back cleanly
+  // if the selected one gets removed by a realtime DELETE event.
+  useEffect(() => {
+    if (contacts.length === 0) {
+      setSelectedId(null);
+      return;
+    }
+    if (!selectedId || !contacts.some((c) => c.id === selectedId)) {
+      setSelectedId(contacts[0].id);
+    }
+  }, [contacts, selectedId]);
 
   const filtered = contacts.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.handle.toLowerCase().includes(search.toLowerCase())
   );
+
+  const selectedContact = filtered.find((c) => c.id === selectedId) ?? filtered[0];
 
   const copy = (id: string, addr: string) => {
     navigator.clipboard.writeText(addr);
@@ -124,142 +139,160 @@ export function ContactsView() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "var(--background)", color: "var(--foreground)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "var(--background)", color: "var(--foreground)", transition: "background-color 0.3s ease, color 0.3s ease" }}>
       <Header />
 
-      {/* Toolbar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-        <div>
-          <div style={{ color: "var(--foreground)", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Contacts</div>
-          <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{contacts.length} saved on Stellar</div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "var(--muted)", border: "1px solid var(--border)", width: 220 }}>
-            <Search size={13} color="var(--muted-foreground)" />
-            <input
-              type="text"
-              placeholder="Search contacts…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "var(--foreground)", fontSize: 13, fontFamily: FF }}
-            />
-          </div>
-          <button
-            onClick={() => setShowAddContact(true)}
-            style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: 10, padding: "9px 16px", background: "#2563EB", border: "none", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: FF, transition: "background 150ms" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}
-          >
-            <UserPlus size={14} color="#fff" />
-            Add New Contact
-          </button>
-        </div>
-      </div>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 
-      {/* Column headers */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 2.6fr 1fr 1fr 80px", padding: "10px 28px", flexShrink: 0 }}>
-        {["Contact", "Stellar Address", "Tag", "Last Sent", ""].map((col) => (
-          <div key={col} style={{ color: "var(--muted-foreground)", fontSize: 10, fontWeight: 700, fontFamily: FF, letterSpacing: "0.09em", textTransform: "uppercase" }}>
-            {col}
-          </div>
-        ))}
-      </div>
-
-      {/* Rows */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 2 }}>
-        {filtered.map((c) => (
-          <div
-            key={c.id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 2.6fr 1fr 1fr 80px",
-              alignItems: "center",
-              padding: "13px 8px",
-              borderRadius: 12,
-              background: hovered === c.id ? "var(--muted)" : "transparent",
-              border: `1px solid ${hovered === c.id ? "rgba(37,99,235,0.18)" : "var(--border)"}`,
-              transition: "all 150ms",
-              cursor: "default",
-            }}
-            onMouseEnter={() => setHovered(c.id)}
-            onMouseLeave={() => setHovered(null)}
-          >
-            {/* Avatar + name */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 38, height: 38, borderRadius: "50%", background: c.avatarBg, border: "1.5px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <span style={{ color: c.avatarColor, fontSize: 12, fontWeight: 700, fontFamily: FF }}>{c.initials}</span>
-              </div>
-              <div>
-                <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 600, fontFamily: FF }}>{c.name}</div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF }}>{c.handle}</div>
-              </div>
+        {/* LEFT PANE: Master List */}
+        <div style={{ width: 340, borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", flexShrink: 0, backgroundColor: "var(--card)" }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 20, fontWeight: 600, fontFamily: FF }}>Contacts</div>
+              <button onClick={() => setShowAddContact(true)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center" }}>
+                <UserPlus size={20} />
+              </button>
             </div>
 
-            {/* Address */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "monospace", background: "var(--muted)", padding: "2px 8px", borderRadius: 5, border: "1px solid var(--border)" }}>
-                {c.address.slice(0, 8)}...{c.address.slice(-6)}
-              </span>
-              <button
-                onClick={() => copy(c.id, c.address)}
-                title="Copy"
-                style={{ width: 24, height: 24, borderRadius: 6, background: copied === c.id ? "rgba(34,197,94,0.08)" : "transparent", border: copied === c.id ? "1px solid rgba(34,197,94,0.2)" : "1px solid transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "var(--muted)", border: "1px solid var(--border)" }}>
+              <Search size={14} style={{ color: "var(--muted-foreground)" }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "var(--foreground)", fontSize: 14, fontFamily: FF }}
+              />
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+            {loading && (
+              <div style={{ padding: 20, textAlign: "center", color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF }}>
+                Loading contacts…
+              </div>
+            )}
+
+            {error && !loading && (
+              <div style={{ padding: 20, textAlign: "center", color: "#F87171", fontSize: 13, fontFamily: FF }}>
+                {error}
+              </div>
+            )}
+
+            {!loading && !error && filtered.map((c) => (
+              <div
+                key={c.id}
+                onClick={() => setSelectedId(c.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  backgroundColor: selectedId === c.id ? "var(--muted)" : "transparent",
+                  border: selectedId === c.id ? "1px solid var(--border)" : "1px solid transparent",
+                  transition: "all 150ms",
+                }}
               >
-                <Copy size={11} color={copied === c.id ? "#4ADE80" : "var(--muted-foreground)"} />
-              </button>
-              <a href="#" title="Explorer" style={{ width: 24, height: 24, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
-                <ExternalLink size={11} color="var(--muted-foreground)" />
-              </a>
-            </div>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: c.avatarBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ color: c.avatarColor, fontSize: 14, fontWeight: 700 }}>{c.initials}</span>
+                </div>
+                <div style={{ flex: 1, overflow: "hidden" }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden", color: "var(--foreground)" }}>{c.name}</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{c.tag || "No Tag"}</div>
+                </div>
+              </div>
+            ))}
 
-            {/* Tag */}
-            <div>
-              {c.tag ? (
-                <span style={{ padding: "3px 10px", borderRadius: 20, background: c.tagBg, color: c.tagColor, fontSize: 11, fontWeight: 500, fontFamily: FF }}>
-                  {c.tag}
-                </span>
-              ) : (
-                <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>—</span>
-              )}
-            </div>
-
-            {/* Last sent */}
-            <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>{c.lastSent}</div>
-
-            {/* Send */}
-            <div style={{ display: "flex", justifyContent: "flex-end", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
-              <button style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "#2563EB", border: "none", cursor: "pointer", color: "#fff", fontSize: 12, fontWeight: 600, fontFamily: FF }}>
-                <Send size={11} color="#fff" />
-                Send
-              </button>
-            </div>
+            {!loading && !error && filtered.length === 0 && (
+              <div style={{ padding: 20, textAlign: "center", color: "var(--muted-foreground)", fontSize: 14 }}>
+                No contacts found.
+              </div>
+            )}
           </div>
-        ))}
+        </div>
 
-        {loading && (
-          <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF, padding: "40px 0", textAlign: "center" }}>
-            Loading contacts…
-          </div>
-        )}
+        {/* RIGHT PANE: Detail View */}
+        <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, backgroundColor: "var(--background)" }}>
+          {selectedContact ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedContact.id} /* tells framer-motion to animate when the contact changes */
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: 400, width: "100%" }}
+              >
 
-        {error && !loading && (
-          <div style={{ color: "#F87171", fontSize: 13, fontFamily: FF, padding: "20px 0", textAlign: "center" }}>
-            {error}
-          </div>
-        )}
+                <div style={{ width: 100, height: 100, borderRadius: "50%", background: selectedContact.avatarBg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, border: `2px solid ${selectedContact.tagBg}` }}>
+                  <span style={{ color: selectedContact.avatarColor, fontSize: 36, fontWeight: 700 }}>{selectedContact.initials}</span>
+                </div>
 
-        {filtered.length === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 12 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Search size={22} color="var(--muted-foreground)" />
+                <h2 style={{ fontSize: 26, fontWeight: 700, margin: "0 0 4px 0", color: "var(--foreground)" }}>{selectedContact.name}</h2>
+                <p style={{ color: "var(--muted-foreground)", margin: "0 0 24px 0", fontSize: 15 }}>{selectedContact.handle}</p>
+
+                <div style={{ width: "100%", backgroundColor: "var(--card)", borderRadius: 16, padding: "20px", marginBottom: 32, border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20, alignItems: "center" }}>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Group Tag</span>
+                    {selectedContact.tag ? (
+                      <span style={{ padding: "4px 12px", borderRadius: 20, background: selectedContact.tagBg, color: selectedContact.tagColor, fontSize: 12, fontWeight: 600 }}>{selectedContact.tag}</span>
+                    ) : (
+                      <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF }}>—</span>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Stellar Address</span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--muted)", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border)" }}>
+                      <span style={{ fontSize: 13, fontFamily: "monospace", color: "var(--foreground)" }}>
+                        {selectedContact.address.slice(0, 10)}...{selectedContact.address.slice(-8)}
+                      </span>
+                      <button onClick={() => copy(selectedContact.id, selectedContact.address)} style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex" }}>
+                        <Copy size={16} color={copied === selectedContact.id ? "#4ADE80" : "var(--muted-foreground)"} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
+                  <button style={{ width: "100%", padding: "16px", borderRadius: 12, background: "#2563EB", border: "none", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#1D4ED8")} onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}>
+                    <Send size={16} />
+                    Send Payment
+                  </button>
+
+                  <button
+                    onClick={() => setShowHistoryModal(true)}
+                    style={{ width: "100%", padding: "16px", borderRadius: 12, background: "var(--muted)", border: "1px solid var(--border)", color: "var(--foreground)", fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 150ms" }}
+                  >
+                    <Clock size={16} />
+                    View History
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <div style={{ color: "var(--muted-foreground)", fontSize: 16, fontFamily: FF }}>
+              {loading ? "Loading contacts…" : "No contact selected"}
             </div>
-            <div style={{ color: "var(--foreground)", fontSize: 15, fontWeight: 600, fontFamily: FF }}>No contacts found</div>
-            <div style={{ color: "var(--muted-foreground)", fontSize: 13, fontFamily: FF }}>Try a different search term.</div>
-          </div>
-        )}
+          )}
+
+          {/* Contact History Modal */}
+          <AnimatePresence>
+            {showHistoryModal && selectedContact && (
+              <ContactHistoryModal
+                contactId={selectedContact.id}
+                contactName={selectedContact.name}
+                onClose={() => setShowHistoryModal(false)}
+              />
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* ── Add Contact Modal ── */}
+      {/* Add Contact Modal stays fixed globally */}
       <AnimatePresence>
         {showAddContact && (
           <AddContactModal
@@ -277,6 +310,98 @@ export function ContactsView() {
           />
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+/* ── Contact History Modal ── */
+function ContactHistoryModal({ contactId, contactName, onClose }: { contactId: string; contactName: string; onClose: () => void }) {
+  const [txs, setTxs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // getHistory() returns the full transaction list (each row embeds its
+    // related contact) — filter down to this contact client-side, since
+    // the backend doesn't expose a per-contact history endpoint.
+    getHistory()
+      .then((data) => {
+        const forContact = (data || []).filter((tx: any) => tx.contact?.id === contactId);
+        setTxs(forContact);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [contactId]);
+
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      {/* Backdrop */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} onClick={onClose} />
+
+      {/* Modal Box */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        style={{
+          position: "relative",
+          background: "var(--card)",
+          width: "100%",
+          maxWidth: 500,
+          maxHeight: "80vh",
+          borderRadius: 24,
+          zIndex: 51,
+          boxShadow: "0 24px 50px rgba(0,0,0,0.15)",
+          display: "flex",
+          flexDirection: "column",
+          border: "1px solid var(--border)"
+        }}
+      >
+        <div style={{ padding: "24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: FF, color: "var(--foreground)" }}>History with {contactName}</h3>
+          </div>
+          <button onClick={onClose} style={{ background: "var(--muted)", border: "none", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--foreground)" }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div style={{ padding: "20px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+          {loading ? (
+            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF }}>Loading history...</div>
+          ) : txs.length === 0 ? (
+            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF }}>No past transactions found.</div>
+          ) : (
+            txs.map((tx) => {
+              const isOutgoing = String(tx.amount).startsWith("-");
+              return (
+                <div key={tx.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "var(--muted)", borderRadius: 16, border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--background)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border)" }}>
+                      {isOutgoing ? <ArrowUpRight size={16} color="#60A5FA" /> : <ArrowDownLeft size={16} color="#4ADE80" />}
+                    </div>
+                    <div>
+                      <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>{tx.memo || "No memo"}</div>
+                      <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
+                        {new Date(tx.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ color: isOutgoing ? "var(--foreground)" : "#4ADE80", fontSize: 15, fontWeight: 700, fontFamily: FF }}>
+                      {isOutgoing ? "" : "+"}₱{parseFloat(tx.amount).toLocaleString()}
+                    </div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, textTransform: "uppercase", marginTop: 2 }}>{tx.status}</div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
