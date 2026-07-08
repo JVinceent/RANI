@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabase } from "../db";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
 import { parseCommand } from "../lib/nlp";
+import { geminiParseCommand } from "../lib/geminiFallback";
 
 export const parseRouter = Router();
 parseRouter.use(requireAuth);
@@ -13,7 +14,15 @@ parseRouter.post("/", async (req: AuthedRequest, res) => {
   const parsed = bodySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const command = parseCommand(parsed.data.text);
+  let command = parseCommand(parsed.data.text);
+
+  // Regex found nothing at all — fall back to Gemini instead of
+  // immediately asking a clarifying question. Partial matches (missing
+  // amount/recipient) still use the regex path's own clarification flow
+  // below, so we only pay for an LLM call on a genuine total miss.
+  if (command.intent === "unknown") {
+    command = await geminiParseCommand(parsed.data.text);
+  }
 
   // No recipient name to look up at all, or intent wasn't understood —
   // nothing to resolve, return as-is.
