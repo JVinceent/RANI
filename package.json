@@ -10,6 +10,7 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "multer": "^2.2.0"
   }
 }

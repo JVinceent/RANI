@@ -61,6 +61,7 @@ export function ChatView({ userName, onMicClick }: { userName: string, onMicClic
   const [state, setState] = useState<ChatState>("landing");
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const [awaiting, setAwaiting] = useState<"recipient" | "amount" | null>(null);
   const [candidates, setCandidates] = useState<Contact[] | null>(null);
@@ -69,11 +70,10 @@ export function ChatView({ userName, onMicClick }: { userName: string, onMicClic
   const [balance, setBalance] = useState<Balance | null>(null);
   const [notFoundName, setNotFoundName] = useState<string | null>(null);
   const [addingContactName, setAddingContactName] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const addMessage = (role: "user" | "assistant", text: string) => {
-    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role, text }]);
-  };
+    setMessages((prev: any) => [...prev, { id: crypto.randomUUID(), role, text }]);
+  };  
 
   const go = (next: ChatState) => setState(next);
 
@@ -363,8 +363,8 @@ if (awaiting === "amount") {
               }}
             >
               <ChatThread
-                state={state as PaymentState}
                 messages={messages}
+                state={state as PaymentState}
                 candidates={candidates}
                 notFoundName={notFoundName}
                 resolvedContact={resolvedContact}

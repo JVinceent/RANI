@@ -21,8 +21,8 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
+  const [messages, setMessages] = useState<{ id: number; sender: "user" | "rani"; text: string }[]>([]);
 
-  // --- THEME STATE ---
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
@@ -131,7 +131,10 @@ export default function App() {
         <AnimatePresence mode="wait">
           {activeView === "chat" && (
             <PageTransition key="chat">
-              <ChatView userName={userName ?? "there"} onMicClick={() => setActiveView("voice")} />
+              <ChatView 
+                userName={userName ?? "there"} 
+                onMicClick={() => setActiveView("voice")} 
+              />
             </PageTransition>
           )}
           {activeView === "contacts" && (
@@ -146,7 +149,17 @@ export default function App() {
           )}
           {activeView === "voice" && (
             <PageTransition key="voice">
-              <VoiceListeningView onCancel={() => setActiveView("chat")} />
+              <VoiceListeningView 
+                onCancel={() => setActiveView("chat")} 
+                onSuccess={(userText, aiText) => {
+                  console.log("SUCCESS CALLBACK REACHED");
+                  setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "user", text: userText }]);
+                  setTimeout(() => {
+                    setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", text: aiText }]);
+                  }, 500);
+                  setActiveView("chat");
+                }} 
+              />
             </PageTransition>
           )}
           {activeView === "settings" && (

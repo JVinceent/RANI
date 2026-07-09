@@ -1,10 +1,14 @@
 import { Router } from 'express';
 import multer from 'multer';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// @ts-ignore - for TypeScript to ignore the middleware type mismatch
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+// @ts-ignore - Bypassing TypeScript's multer mismatch
 router.post('/', upload.single('audio'), async (req, res) => {
   try {
     const audioFile = req.file;
@@ -13,17 +17,55 @@ router.post('/', upload.single('audio'), async (req, res) => {
       return res.status(400).json({ error: 'No audio file provided' });
     }
 
-    console.log('🎤 Received audio file:', audioFile.originalname);
-    console.log('📦 File size:', audioFile.size, 'bytes');
+    console.log('🎤 Caught audio file! Sending to Gemini...');
 
+    // Sets up Gemini 1.5 Flash 
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+      }
+    });
+
+    // Convert the audio buffer into the format Gemini wants
+    const audioPart = {
+      inlineData: {
+        data: audioFile.buffer.toString("base64"),
+        mimeType: audioFile.mimetype || 'audio/webm',
+      },
+    };
+
+    // Tells Gemini exactly what to do and how to structure the output
+    const prompt = `
+      You are Rani, a helpful, concise AI financial assistant. 
+      Listen to the user's voice message. 
+      
+      Respond with a JSON object using this exact structure:
+      {
+        "userTranscription": "Exactly what the user said in the audio",
+        "raniReply": "Your short 1-2 sentence response to the user as Rani"
+      }
+    `;
+
+    // For sending
+    const result = await model.generateContent([prompt, audioPart]);
+    const responseText = result.response.text();
+    
+    // Parsing JSON response from Gemini
+    const aiData = JSON.parse(responseText);
+
+    console.log(`🗣️ You said: "${aiData.userTranscription}"`);
+    console.log(`🤖 Rani says: "${aiData.raniReply}"`);
+
+    // Sends sata back to frontend
     res.json({ 
       success: true, 
-      userTranscription: "Testing, testing, 1 2 3!", 
-      raniReply: "Loud and clear! I caught your audio file." 
+      userTranscription: aiData.userTranscription, 
+      raniReply: aiData.raniReply 
     });
 
   } catch (error) {
-    console.error('Error processing voice upload:', error);
+    console.error('❌ AI Processing Error:', error);
     res.status(500).json({ error: 'Internal server error processing voice' });
   }
 });

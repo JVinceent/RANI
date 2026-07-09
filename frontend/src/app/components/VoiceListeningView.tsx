@@ -20,7 +20,13 @@ interface VoiceListeningViewProps {
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
 
-export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
+export function VoiceListeningView({ 
+  onCancel, 
+  onSuccess 
+}: { 
+  onCancel: () => void, 
+  onSuccess: (userText: string, aiText: string) => void 
+}) {
   // --- Audio Recording State ---
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
@@ -79,18 +85,28 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
     formData.append("audio", audioBlob, "voice-message.webm");
 
     try {
-      const response = await fetch("http://localhost:4000/api/voice", {
+      const response = await fetch("http://localhost:4000/api/voice", { 
         method: "POST",
         body: formData,
       });
 
       const data = await response.json();
-      console.log("Rani's Brain Says:", data);
+      if (data.success && onSuccess) {
+        onSuccess(data.userTranscription, data.raniReply);
+      }
       
-      if (onCancel) onCancel();
+      console.log("Frontend received from backend:", data); 
+
+      if (data.success && onSuccess) {
+        console.log("Calling onSuccess...");
+        onSuccess(data.userTranscription, data.raniReply);
+      } else {
+        console.log("onSuccess missing or success is false");
+        onCancel?.();
+      }
     } catch (error) {
-      console.error("Failed to send audio to backend:", error);
-      if (onCancel) onCancel();
+      console.error("Failed to send:", error);
+      onCancel?.();
     }
   };
 
