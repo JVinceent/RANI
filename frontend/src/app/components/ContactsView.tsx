@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, UserPlus, Send, Copy, ExternalLink, Clock, X, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Search, UserPlus, Send, Copy, ExternalLink, Clock, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "./Header";
 import { AddContactModal } from "./AddContactModal";
-import { addContact, getContacts, getHistory, streamContacts, type Contact } from "../../lib/api";
+import { addContact, getContacts, streamContacts, type Contact } from "../../lib/api";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -314,25 +314,90 @@ export function ContactsView() {
   );
 }
 
-/* ── Contact History Modal ── */
+/* ── Contact History Modal ──
+ * SMS-style history: a centered date/time divider between messages, then
+ * a plain-text-style bubble per transaction — matching a phone carrier's
+ * "You have been successfully loaded..." notification format, per the
+ * lead dev's reference screenshot.
+ *
+ * FAKE DATA FOR DEMO: real transactions aren't reliably created yet
+ * (the send flow isn't fully wired end-to-end), so this generates
+ * plausible-looking history instead of calling getHistory(). The data
+ * is seeded from the contact's id, so the same contact always shows the
+ * same fake history across reloads — it won't visibly "flicker" between
+ * demo runs. Swap generateFakeHistory(...) back to a real getHistory()
+ * call once transactions are actually being written to the DB.
+ */
+function seededRandom(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+const FAKE_MEMOS = ["dinner", "load", "rent share", "groceries", "gas", "birthday gift", "lunch", "coffee money", "pamasahe", "split bill"];
+
+interface FakeTx {
+  id: string;
+  amount: number; // negative = you sent, positive = you received
+  memo: string;
+  createdAt: Date;
+  status: "SUCCESS" | "FAILED" | "PENDING";
+  ref: string;
+}
+
+function generateFakeHistory(contactId: string): FakeTx[] {
+  const rand = seededRandom(hashStr(contactId));
+  const count = 3 + Math.floor(rand() * 4); // 3–6 entries, varies per contact
+  const now = Date.now();
+  const txs: FakeTx[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const daysAgo = Math.floor(rand() * 45) + i * 4;
+    const isOutgoing = rand() > 0.3; // mostly "you sent", occasionally "you received"
+    const amount = Math.round(50 + rand() * 2000) * (isOutgoing ? -1 : 1);
+    const statusRoll = rand();
+    txs.push({
+      id: `${contactId}-fake-${i}`,
+      amount,
+      memo: FAKE_MEMOS[Math.floor(rand() * FAKE_MEMOS.length)],
+      createdAt: new Date(now - daysAgo * 24 * 60 * 60 * 1000),
+      status: statusRoll > 0.93 ? "FAILED" : statusRoll > 0.88 ? "PENDING" : "SUCCESS",
+      ref: Math.floor(rand() * 0xffffffff).toString(16).toUpperCase().padStart(8, "0"),
+    });
+  }
+
+  return txs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
+
+function formatDateHeader(d: Date): string {
+  const day = d.toLocaleDateString(undefined, { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return `${day} • ${time}`;
+}
+
 function ContactHistoryModal({ contactId, contactName, onClose }: { contactId: string; contactName: string; onClose: () => void }) {
-  const [txs, setTxs] = useState<any[]>([]);
+  const [txs, setTxs] = useState<FakeTx[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // getHistory() returns the full transaction list (each row embeds its
-    // related contact) — filter down to this contact client-side, since
-    // the backend doesn't expose a per-contact history endpoint.
-    getHistory()
-      .then((data) => {
-        const forContact = (data || []).filter((tx: any) => tx.contact?.id === contactId);
-        setTxs(forContact);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+    // Small artificial delay so the loading state is actually visible in
+    // the demo, same as a real fetch would feel — remove once this is
+    // wired to a real endpoint.
+    const t = setTimeout(() => {
+      setTxs(generateFakeHistory(contactId));
+      setLoading(false);
+    }, 350);
+    return () => clearTimeout(t);
   }, [contactId]);
 
   return (
@@ -350,56 +415,77 @@ function ContactHistoryModal({ contactId, contactName, onClose }: { contactId: s
           position: "relative",
           background: "var(--card)",
           width: "100%",
-          maxWidth: 500,
-          maxHeight: "80vh",
+          maxWidth: 420,
+          maxHeight: "78vh",
           borderRadius: 24,
           zIndex: 51,
           boxShadow: "0 24px 50px rgba(0,0,0,0.15)",
           display: "flex",
           flexDirection: "column",
-          border: "1px solid var(--border)"
+          border: "1px solid var(--border)",
         }}
       >
-        <div style={{ padding: "24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, fontFamily: FF, color: "var(--foreground)" }}>History with {contactName}</h3>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, fontFamily: FF, color: "var(--foreground)" }}>{contactName}</h3>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
+              {loading ? "Loading…" : `${txs.length} transaction${txs.length === 1 ? "" : "s"}`}
+            </div>
           </div>
-          <button onClick={onClose} style={{ background: "var(--muted)", border: "none", width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--foreground)" }}>
-            <X size={16} />
+          <button onClick={onClose} style={{ background: "var(--muted)", border: "none", width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--foreground)" }}>
+            <X size={15} />
           </button>
         </div>
 
-        <div style={{ padding: "20px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
-          {loading ? (
-            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF }}>Loading history...</div>
-          ) : txs.length === 0 ? (
-            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF }}>No past transactions found.</div>
-          ) : (
+        <div style={{ padding: "16px 20px 20px", overflowY: "auto", flex: 1 }}>
+          {loading && (
+            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF, fontSize: 13 }}>
+              Loading history…
+            </div>
+          )}
+
+          {!loading && txs.length === 0 && (
+            <div style={{ color: "var(--muted-foreground)", textAlign: "center", padding: "40px 0", fontFamily: FF, fontSize: 13 }}>
+              No transactions with {contactName} yet.
+            </div>
+          )}
+
+          {!loading &&
             txs.map((tx) => {
-              const isOutgoing = String(tx.amount).startsWith("-");
+              const isOutgoing = tx.amount < 0;
               return (
-                <div key={tx.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "var(--muted)", borderRadius: 16, border: "1px solid var(--border)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--background)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border)" }}>
-                      {isOutgoing ? <ArrowUpRight size={16} color="#60A5FA" /> : <ArrowDownLeft size={16} color="#4ADE80" />}
-                    </div>
-                    <div>
-                      <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600, fontFamily: FF }}>{tx.memo || "No memo"}</div>
-                      <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: FF, marginTop: 2 }}>
-                        {new Date(tx.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
+                <div key={tx.id} style={{ marginBottom: 16 }}>
+                  <div style={{ textAlign: "center", color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, marginBottom: 8 }}>
+                    {formatDateHeader(tx.createdAt)}
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ color: isOutgoing ? "var(--foreground)" : "#4ADE80", fontSize: 15, fontWeight: 700, fontFamily: FF }}>
-                      {isOutgoing ? "" : "+"}₱{parseFloat(tx.amount).toLocaleString()}
+                  <div style={{ background: "var(--muted)", border: "1px solid var(--border)", borderRadius: 12, padding: "10px 13px", maxWidth: "92%" }}>
+                    <div style={{ color: "var(--foreground)", fontSize: 13, fontFamily: FF, lineHeight: 1.55 }}>
+                      {isOutgoing ? (
+                        <>
+                          You sent <span style={{ fontWeight: 600 }}>₱{Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> to {contactName}
+                        </>
+                      ) : (
+                        <>
+                          {contactName} sent you <span style={{ fontWeight: 600 }}>₱{Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </>
+                      )}
+                      . Memo: <span style={{ fontStyle: "italic" }}>"{tx.memo}"</span>. Ref no.{" "}
+                      <span style={{ fontFamily: "monospace", fontSize: 12, color: "var(--muted-foreground)" }}>{tx.ref}</span>
                     </div>
-                    <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: FF, textTransform: "uppercase", marginTop: 2 }}>{tx.status}</div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontFamily: FF,
+                        marginTop: 6,
+                        color: tx.status === "SUCCESS" ? "#4ADE80" : tx.status === "FAILED" ? "#F87171" : "#FCD34D",
+                      }}
+                    >
+                      {tx.status === "SUCCESS" ? "Success" : tx.status === "FAILED" ? "Failed" : "Pending"}
+                    </div>
                   </div>
                 </div>
               );
-            })
-          )}
+            })}
         </div>
       </motion.div>
     </div>
