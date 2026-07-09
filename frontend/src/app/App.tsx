@@ -101,8 +101,10 @@ export default function App() {
     <div
       style={{
         display: "flex",
-        width: "100vw",
-        height: "100vh",
+        // 100% (not 100vw) so a vertical scrollbar can't push content sideways
+        // on mobile; dvh tracks the real viewport under mobile browser chrome.
+        width: "100%",
+        height: "100dvh",
         background: "var(--background)",
         color: "var(--foreground)",
         transition: "background-color 0.3s ease, color 0.3s ease",

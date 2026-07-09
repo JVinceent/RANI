@@ -121,6 +121,41 @@ export const submitTransaction = (data: { transactionId: string; signedXdr: stri
 
 export const getHistory = () => request<any[]>("/transactions/history");
 
+// ── Swaps (SDEX / "StellarX"-style in-app trade) ──────────────────
+export interface AssetRef {
+  code: string;
+  issuer?: string;
+}
+
+export interface SwapQuote {
+  sendAmount: string;
+  destAmount: string;
+  rate: string;
+  path: string[];
+  pathAssets: AssetRef[];
+  destMin?: string;
+}
+
+// Live quote — how much `dest` you get for `sendAmount` of `send`.
+export const getSwapQuote = (data: { send: AssetRef; sendAmount: string; dest: AssetRef }) =>
+  request<SwapQuote>("/transactions/swap/quote", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+// Build the unsigned swap XDR. Sign it with useWallet().sign(xdr, address),
+// then call submitTransaction({ transactionId, signedXdr }).
+export const buildSwap = (data: {
+  send: AssetRef;
+  sendAmount: string;
+  dest: AssetRef;
+  slippageBps?: number;
+}) =>
+  request<{ transactionId: string; xdr: string; quote: SwapQuote }>(
+    "/transactions/swap/build",
+    { method: "POST", body: JSON.stringify(data) }
+  );
+
 export function streamContacts(
   onChange: (eventType: "INSERT" | "UPDATE" | "DELETE", payload: any) => void
 ) {

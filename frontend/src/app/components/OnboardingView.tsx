@@ -24,8 +24,8 @@ export function OnboardingView({ onContinue }: OnboardingViewProps) {
   return (
     <div
       style={{
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100dvh",
         fontFamily: FF,
         display: "flex",
         alignItems: "center",
@@ -34,6 +34,8 @@ export function OnboardingView({ onContinue }: OnboardingViewProps) {
           "radial-gradient(ellipse at 50% 42%, #070F1E 0%, #040810 58%, #020508 100%)",
         position: "relative",
         overflow: "hidden",
+        padding: 20, // keeps the card off the screen edges on narrow phones
+        boxSizing: "border-box",
       }}
     >
       {/* Ambient glows */}
@@ -83,9 +85,11 @@ export function OnboardingView({ onContinue }: OnboardingViewProps) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.36, ease: "easeOut" }}
         style={{
-          width: 488,
-          padding: "48px 44px",
+          width: "100%",
+          maxWidth: 488,
+          padding: "clamp(28px, 6vw, 48px) clamp(22px, 5vw, 44px)",
           borderRadius: 26,
+          boxSizing: "border-box",
           background: "rgba(11, 22, 44, 0.9)",
           border: "1px solid rgba(255,255,255,0.08)",
           backdropFilter: "blur(28px)",

@@ -73,7 +73,9 @@ export async function geminiParseCommand(raw: string): Promise<ParsedCommand> {
       throw new Error(`Gemini API error: ${response.status} ${await response.text()}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    };
     const textOut = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!textOut) throw new Error("Empty Gemini response");
 

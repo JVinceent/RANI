@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Wallet, Lock, Shield, Zap } from "lucide-react";
+import { useIsMobile } from "./ui/use-mobile";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -15,22 +16,28 @@ interface AuthViewProps {
 export function AuthView({ onConnect }: AuthViewProps) {
   const [hoverF, setHoverF] = useState(false);
   const [hoverX, setHoverX] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <div
       style={{
         display: "flex",
-        width: "100vw",
-        height: "100vh",
+        // 100% (not 100vw) avoids the scrollbar-induced horizontal overflow on
+        // mobile; dvh tracks the real viewport under the browser's chrome.
+        width: "100%",
+        height: "100dvh",
         fontFamily: FF,
         overflow: "hidden",
+        background: "#07101F",
       }}
     >
-      {/* ── LEFT COLUMN ─────────────────────────────────────────────── */}
+      {/* ── LEFT COLUMN (decorative marketing panel — desktop only) ──── */}
       <div
         style={{
+          // Hidden on phones so the connect card gets the whole screen instead
+          // of being crushed into half of a two-column layout.
+          display: isMobile ? "none" : "flex",
           flex: 1,
-          display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -153,7 +160,7 @@ export function AuthView({ onConnect }: AuthViewProps) {
         </div>
       </div>
 
-      {/* ── RIGHT COLUMN ─────────────────────────────────────────────── */}
+      {/* ── RIGHT COLUMN (connect card) ──────────────────────────────── */}
       <div
         style={{
           flex: 1,
@@ -161,14 +168,15 @@ export function AuthView({ onConnect }: AuthViewProps) {
           alignItems: "center",
           justifyContent: "center",
           background: "#07101F",
-          padding: 60,
+          padding: isMobile ? 20 : 60,
         }}
       >
         {/* Frosted glass card */}
         <div
           style={{
-            width: 440,
-            padding: "48px 44px",
+            width: "100%",
+            maxWidth: 440,
+            padding: isMobile ? "32px 24px" : "48px 44px",
             borderRadius: 26,
             background: "rgba(11, 22, 44, 0.88)",
             border: "1px solid rgba(255,255,255,0.08)",

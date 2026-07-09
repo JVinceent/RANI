@@ -6,6 +6,7 @@ import { requireAuth, AuthedRequest } from "../middleware/auth";
 import { buildPaymentXDR, submitSignedTransaction, pollTransaction } from "../lib/payment";
 import { simulatePathPayment } from "../lib/simulate";
 import { fetchBalances } from "../lib/balances";
+import { findSwapQuote, applySlippage, buildSwapXDR } from "../lib/swap";
 
 export const transactionsRouter = Router();
 transactionsRouter.use(requireAuth);
@@ -24,10 +25,18 @@ transactionsRouter.get("/balance", async (req: AuthedRequest, res) => {
   res.json(balances);
 });
 
+// Stellar amounts are positive with <=7 decimal places. Validate here so a
+// negative/zero/NaN amount can't slip past the spending-limit check below.
+const stellarAmount = z
+  .string()
+  .refine((v) => /^\d+(\.\d{1,7})?$/.test(v) && parseFloat(v) > 0, {
+    message: "amount must be a positive number with up to 7 decimal places",
+  });
+
 const simulateSchema = z.object({
   destinationAssetCode: z.string(),
   destinationAssetIssuer: z.string().optional(),
-  destinationAmount: z.string(),
+  destinationAmount: stellarAmount,
 });
 
 transactionsRouter.post("/simulate", async (req: AuthedRequest, res) => {
@@ -58,7 +67,7 @@ transactionsRouter.post("/simulate", async (req: AuthedRequest, res) => {
 
 const buildSchema = z.object({
   contactId: z.string(),
-  amount: z.string(),
+  amount: stellarAmount,
   assetCode: z.string(),
   assetIssuer: z.string().optional(),
   memo: z.string().max(28).optional(),
@@ -127,6 +136,99 @@ transactionsRouter.post("/build", async (req: AuthedRequest, res) => {
 
   if (txErr) return res.status(500).json({ error: txErr.message });
   res.json({ transactionId: tx.id, xdr, feeXLM });
+});
+
+// ── SDEX swaps (StellarX-style in-app trade) ─────────────────────────
+// A swap is a path payment to your OWN account (asset A out → asset B back),
+// routed through the Stellar order books. Non-custodial: we quote + build the
+// unsigned XDR; the client signs in Freighter and submits via /submit below.
+
+const assetSchema = z.object({
+  code: z.string().min(1).max(12),
+  issuer: z.string().length(56).optional(),
+});
+
+const swapQuoteSchema = z.object({
+  send: assetSchema,
+  sendAmount: stellarAmount,
+  dest: assetSchema,
+});
+
+// Live quote: how much of `dest` you get for `sendAmount` of `send`, and the route.
+transactionsRouter.post("/swap/quote", async (req: AuthedRequest, res) => {
+  const parsed = swapQuoteSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  try {
+    const quote = await findSwapQuote(parsed.data);
+    res.json(quote);
+  } catch (e: any) {
+    res.status(422).json({ error: e.message });
+  }
+});
+
+const swapBuildSchema = z.object({
+  send: assetSchema,
+  sendAmount: stellarAmount,
+  dest: assetSchema,
+  // Slippage tolerance in basis points; default 50 = 0.5%. Caps the worst
+  // acceptable rate so a moving market fails the tx instead of filling badly.
+  slippageBps: z.number().int().min(0).max(1000).optional(),
+});
+
+transactionsRouter.post("/swap/build", async (req: AuthedRequest, res) => {
+  const parsed = swapBuildSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const { data: user, error: userErr } = await supabase
+    .from("users")
+    .select("stellar_public_key")
+    .eq("id", req.userId!)
+    .single();
+
+  if (userErr || !user?.stellar_public_key) {
+    return res.status(400).json({ error: "No linked Stellar account" });
+  }
+
+  try {
+    // Re-quote at build time so the path and destMin reflect the current book.
+    const quote = await findSwapQuote({
+      send: parsed.data.send,
+      sendAmount: parsed.data.sendAmount,
+      dest: parsed.data.dest,
+    });
+    const destMin = applySlippage(quote.destAmount, parsed.data.slippageBps ?? 50);
+
+    const xdr = await buildSwapXDR({
+      publicKey: user.stellar_public_key,
+      send: parsed.data.send,
+      sendAmount: parsed.data.sendAmount,
+      dest: parsed.data.dest,
+      destMin,
+      path: quote.pathAssets,
+    });
+
+    // Record it like any other tx so it flows through /submit and shows in history.
+    const { data: tx, error: txErr } = await supabase
+      .from("transactions")
+      .insert({
+        user_id: req.userId!,
+        contact_id: null,
+        amount: parsed.data.sendAmount,
+        asset_code: parsed.data.send.code,
+        asset_issuer: parsed.data.send.issuer,
+        memo: `Swap ${parsed.data.send.code}->${parsed.data.dest.code}`.slice(0, 28),
+        status: "AWAITING_SIGNATURE",
+      })
+      .select()
+      .single();
+
+    if (txErr) return res.status(500).json({ error: txErr.message });
+
+    res.json({ transactionId: tx.id, xdr, quote: { ...quote, destMin } });
+  } catch (e: any) {
+    res.status(422).json({ error: e.message });
+  }
 });
 
 const submitSchema = z.object({

@@ -5,12 +5,13 @@ import type { CSSProperties, ReactNode } from "react";
 import {
   Mic, Send, Sparkles, Shield, Lock, AlertCircle,
   X, ArrowRight, CheckCircle, ExternalLink, Wallet,
-  Banknote, Clock,
+  Banknote, Clock, ArrowLeftRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { Header } from "./Header";
 import { SEP24Modal } from "./SEP24Modal";
+import { SwapModal } from "./SwapModal";
 //import { buildTransaction, submitTransaction, getBalance, type Contact } from "../../lib/api";
 import { getBalance, addContact, parseCommand, buildTransaction, submitTransaction, type Contact } from "../../lib/api";
 import { useWallet } from "../../hooks/useWallet";
@@ -68,6 +69,7 @@ export function ChatView({ userName }: { userName: string }) {
   const [builtTx, setBuiltTx] = useState<{ transactionId: string; xdr: string } | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [showSEP24, setShowSEP24] = useState(false);
+  const [showSwap, setShowSwap] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const [awaiting, setAwaiting] = useState<"recipient" | "amount" | null>(null);
@@ -383,6 +385,7 @@ if (awaiting === "amount") {
                 }}
                 onCashIn={() => setShowSEP24(true)}
                 onCheckBalance={() => go("balance")}
+                onSwap={() => setShowSwap(true)}
               />
             </motion.div>
           ) : state === "balance" ? (
@@ -524,6 +527,7 @@ if (awaiting === "amount") {
 
       <AnimatePresence>
         {showSEP24 && <SEP24Modal onClose={() => setShowSEP24(false)} />}
+        {showSwap && <SwapModal onClose={() => setShowSwap(false)} />}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -582,11 +586,13 @@ function LandingState({
   onSendMoney,
   onCashIn,
   onCheckBalance,
+  onSwap,
 }: {
   userName: string;
   onSendMoney: () => void;
   onCashIn: () => void;
   onCheckBalance: () => void;
+  onSwap: () => void;
 }) {
   return (
     <div
@@ -690,6 +696,10 @@ function LandingState({
 
         <QuickPill variant="ghost" icon={<Wallet size={14} />} onClick={onCheckBalance}>
           Check Balance
+        </QuickPill>
+
+        <QuickPill variant="outlined" icon={<ArrowLeftRight size={14} />} onClick={onSwap}>
+          Swap
         </QuickPill>
       </div>
     </div>
@@ -913,7 +923,7 @@ function DisambiguationBlock({
         — which one do you mean?
       </AIChatBubble>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 460 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", maxWidth: 460 }}>
         {candidates.map((contact, i) => {
           const color = DISAMBIGUATION_COLORS[i % DISAMBIGUATION_COLORS.length];
           const isHovered = hovered === contact.id;
@@ -1016,7 +1026,8 @@ function SummaryBlock({
           overflow: "hidden",
           background: "var(--card)",
           border: "1px solid var(--border)",
-          width: 480,
+          width: "100%",
+          maxWidth: 480,
         }}
       >
         <div style={{ padding: "22px 24px" }}>
@@ -1256,7 +1267,8 @@ function ConfirmModal({
   return (
     <div
       style={{
-        width: 480,
+        width: "100%",
+        maxWidth: 480,
         borderRadius: 22,
         background: "var(--card)",
         border: "1px solid var(--border)",
@@ -1554,7 +1566,8 @@ function SuccessBlock({ onReset, txHash }: { onReset: () => void; txHash: string
           background: "var(--card)",
           border: "1px solid rgba(34,197,94,0.24)",
           boxShadow: "0 0 48px rgba(34,197,94,0.08)",
-          width: 480,
+          width: "100%",
+          maxWidth: 480,
         }}
       >
         <div
@@ -1954,7 +1967,8 @@ function BalanceCard({ onReset }: { onReset: () => void }) {
         overflow: "hidden",
         background: "var(--card)",
         border: "1px solid rgba(255,255,255,0.07)",
-        width: 480,
+        width: "100%",
+        maxWidth: 480,
       }}
     >
       <div
