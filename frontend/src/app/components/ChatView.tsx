@@ -154,8 +154,6 @@ export function ChatView({
       setCandidates(null);     // ADD THIS
       
       try {
-        // Always try full NLP parsing first — handles the case where the
-        // user retypes a whole command instead of just a bare name.
         const result = await parseCommand(text);
 
         if (result.candidates && result.candidates.length > 1) {
