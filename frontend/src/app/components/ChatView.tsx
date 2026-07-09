@@ -758,9 +758,11 @@ function ChatThread({
                 borderRadius: "14px 14px 4px 14px",
                 background: "#2563EB",
                 maxWidth: 360,
+                width: "fit-content",
+                wordBreak: "break-word", 
               }}
             >
-              <p style={{ color: "var(--foreground)", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
+              <p style={{ color: "#FFFFFF", fontSize: 14, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
                 {m.text}
               </p>
             </div>
@@ -768,7 +770,7 @@ function ChatThread({
         ) : (
           <div key={m.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <AIAvatar />
-            <div style={{ maxWidth: 550 }}>
+            <div style={{ maxWidth: 550, width: "fit-content" }}>
               <AIChatBubble>{m.text}</AIChatBubble>
             </div>
           </div>
