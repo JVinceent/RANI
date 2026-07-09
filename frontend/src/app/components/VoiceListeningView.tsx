@@ -22,10 +22,12 @@ interface VoiceListeningViewProps {
 
 export function VoiceListeningView({ 
   onCancel, 
-  onSuccess 
+  onSuccess,
+  setActiveView
 }: { 
   onCancel: () => void, 
-  onSuccess: (userText: string, aiText: string) => void 
+  onSuccess: (userText: string, aiText: string) => void,
+  setActiveView: (view: string) => void
 }) {
   // --- Audio Recording State ---
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -93,6 +95,7 @@ export function VoiceListeningView({
       const data = await response.json();
       if (data.success && onSuccess) {
         onSuccess(data.userTranscription, data.raniReply);
+        setActiveView("chat");
       }
       
       console.log("Frontend received from backend:", data); 

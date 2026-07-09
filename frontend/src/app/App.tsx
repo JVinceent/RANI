@@ -156,8 +156,8 @@ export default function App() {
                   setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "user", text: userText }]);
                   setTimeout(() => {
                     setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", text: aiText }]);
+                    setActiveView("chat");
                   }, 500);
-                  setActiveView("chat");
                 }} 
               />
             </PageTransition>
