@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
+import React, { useEffect, useRef, type ReactNode } from "react";
 import { X, Check, ArrowRight, Wallet, Banknote } from "lucide-react";
 import { motion } from "motion/react";
-import { Header } from "./Header";
+import { Header } from "./Header"; // Assuming you have this!
 
 const FF = "'DM Sans', sans-serif";
 
-/* Predetermined waveform peaks — bell-curve shape, peaks in the center */
+/* Predetermined waveform peaks */
 const WAVE = [
   5, 8, 12, 18, 26, 36, 48, 60, 70, 76, 80, 82, 84, 88, 90, 92,
   94, 96, 94, 92, 90, 88, 86, 90, 92, 88, 84, 80, 74, 68, 60, 50,
@@ -21,6 +21,79 @@ interface VoiceListeningViewProps {
 ═══════════════════════════════════════════════════════════════════ */
 
 export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
+  // --- Audio Recording State ---
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
+
+  // Start recording the exact second this screen opens
+  useEffect(() => {
+    startRecording();
+
+    // Safety catch: kill the mic if they click away or hit cancel
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, []);
+
+  const startRecording = async () => {
+    try {
+      // Ask for mic permissions
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      // Collect audio data
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      // When they click "Done", package it up!
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        stream.getTracks().forEach((track) => track.stop()); // Turn off red recording dot
+        await sendAudioToBackend(audioBlob);
+      };
+
+      mediaRecorder.start();
+    } catch (error) {
+      console.error("Mic access denied:", error);
+      alert("Please allow microphone access to talk to Rani.");
+      if (onCancel) onCancel(); // Send them back to chat if they deny
+    }
+  };
+
+  const stopRecording = () => {
+    // This triggers the onstop event above
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const sendAudioToBackend = async (audioBlob: Blob) => {
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "voice-message.webm");
+
+    try {
+      const response = await fetch("http://localhost:4000/api/voice", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Rani's Brain Says:", data);
+      
+      if (onCancel) onCancel();
+    } catch (error) {
+      console.error("Failed to send audio to backend:", error);
+      if (onCancel) onCancel();
+    }
+  };
+
   return (
     <div
       style={{
@@ -33,7 +106,6 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
     >
       <Header />
 
-      {/* Dimmed chat landing (suggests context) */}
       <div
         style={{
           flex: 1,
@@ -105,7 +177,7 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
       </div>
 
       {/* ── Voice Input Bar ── */}
-      <VoiceBar onCancel={onCancel} />
+      <VoiceBar onCancel={onCancel} onDone={stopRecording} />
     </div>
   );
 }
@@ -114,7 +186,7 @@ export function VoiceListeningView({ onCancel }: VoiceListeningViewProps) {
    VOICE BAR
 ═══════════════════════════════════════════════════════════════════ */
 
-function VoiceBar({ onCancel }: { onCancel?: () => void }) {
+function VoiceBar({ onCancel, onDone }: { onCancel?: () => void; onDone?: () => void }) {
   return (
     <div
       style={{
@@ -304,6 +376,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
         </button>
 
         <button
+          onClick={onDone} 
           style={{
             display: "flex",
             alignItems: "center",
@@ -334,8 +407,6 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
     </div>
   );
 }
-
-/* ── Ghost pill (for dimmed landing bg) ──────────────────────────── */
 
 function GhostPill({
   children,
