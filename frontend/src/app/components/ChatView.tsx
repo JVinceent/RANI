@@ -58,16 +58,20 @@ type ChatMessage = {
 ═══════════════════════════════════════════════════════════════════ */
 
 export function ChatView({ 
-    userName, 
-    onMicClick,
-    messages,
-    setMessages,
-  }: { 
-    userName: string; 
-    onMicClick: () => void;
-    messages: ChatMessage[];
-    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
-  }) {
+  userName, 
+  onMicClick,
+  messages,
+  setMessages,
+  voiceTranscript,
+  onVoiceTranscriptHandled,
+}: { 
+  userName: string;
+  onMicClick: () => void;
+  messages: ChatMessage[];
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  voiceTranscript: string | null;
+  onVoiceTranscriptHandled: () => void;
+}) {
   const [state, setState] = useState<ChatState>("landing");
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -129,10 +133,10 @@ export function ChatView({
     }, 280);
   };
 
-  const handleSend = async () => {
-    const text = inputValue.trim();
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText ?? inputValue).trim();
     if (!text) return;
-    setInputValue("");
+    if (!overrideText) setInputValue("");
 
     if (addingContactName) {
       addMessage("user", text);
@@ -188,7 +192,6 @@ export function ChatView({
           return;
         }
 
-        // Nothing structured was extracted — treat as a bare name (e.g. "Maria")
         const res = await fetch(
           `${import.meta.env.VITE_API_URL}/contacts/resolve?name=${encodeURIComponent(text)}`,
           { headers: { Authorization: `Bearer ${localStorage.getItem("rani_token")}` } }
@@ -284,6 +287,13 @@ if (awaiting === "amount") {
       addMessage("assistant", "Something went wrong trying to understand that.");
     }
   };
+
+  useEffect(() => {
+    if (voiceTranscript) {
+      handleSend(voiceTranscript);
+      onVoiceTranscriptHandled();
+    }
+  }, [voiceTranscript]);
 
   const handleSelectCandidate = (contact: Contact) => {
     addMessage("user", contact.name);

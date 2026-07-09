@@ -22,6 +22,7 @@ export default function App() {
   const [userName, setUserName] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
   const [messages, setMessages] = useState<{ id: string; role: "user" | "assistant"; text: string }[]>([]);
+  const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
 
   const [isDarkMode, setIsDarkMode] = useState(true);
 
@@ -128,17 +129,19 @@ export default function App() {
           position: "relative",
         }}
       >
+        {/* ChatView is ALWAYS mounted — just hidden with CSS when another tab is active */}
+        <div style={{ display: activeView === "chat" ? "flex" : "none", flexDirection: "column", height: "100%" }}>
+          <ChatView 
+            userName={userName ?? "there"} 
+            onMicClick={() => setActiveView("voice")} 
+            messages={messages}
+            setMessages={setMessages}
+            voiceTranscript={pendingVoiceText}
+            onVoiceTranscriptHandled={() => setPendingVoiceText(null)}
+          />
+        </div>
+
         <AnimatePresence mode="wait">
-          {activeView === "chat" && (
-            <PageTransition key="chat">
-              <ChatView 
-                userName={userName ?? "there"} 
-                onMicClick={() => setActiveView("voice")} 
-                messages={messages}
-                setMessages={setMessages}
-              />
-            </PageTransition>
-          )}
           {activeView === "contacts" && (
             <PageTransition key="contacts">
               <ContactsView />
@@ -149,27 +152,25 @@ export default function App() {
               <HistoryView />
             </PageTransition>
           )}
-          {activeView === "voice" && (
-            <PageTransition key="voice">
-              <VoiceListeningView 
-                onCancel={() => setActiveView("chat")} 
-                onSuccess={(userText, aiText) => {
-                  console.log("SUCCESS CALLBACK REACHED");
-                  setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "user", text: userText }]);
-                  setTimeout(() => {
-                    setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", text: aiText }]);
-                    setActiveView("chat");
-                  }, 500);
-                }} 
-              />
-            </PageTransition>
-          )}
           {activeView === "settings" && (
             <PageTransition key="settings">
               <FullSettingsView defaultTab="profile" />
             </PageTransition>
           )}
         </AnimatePresence>
+
+        {activeView === "voice" && (
+          <div style={{ position: "absolute", inset: 0, zIndex: 40 }}>
+            <VoiceListeningView 
+              onCancel={() => setActiveView("chat")} 
+              onSuccess={(userText) => {
+                setPendingVoiceText(userText);
+                setActiveView("chat");
+              }} 
+              setActiveView={setActiveView}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
