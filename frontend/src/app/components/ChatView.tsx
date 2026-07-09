@@ -1,6 +1,6 @@
 //updated 
 // 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import {
   Mic, Send, Sparkles, Shield, Lock, AlertCircle,
@@ -57,11 +57,20 @@ type ChatMessage = {
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
 
-export function ChatView({ userName, onMicClick }: { userName: string, onMicClick: () => void }) {
+export function ChatView({ 
+    userName, 
+    onMicClick,
+    messages,
+    setMessages,
+  }: { 
+    userName: string; 
+    onMicClick: () => void;
+    messages: ChatMessage[];
+    setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  }) {
   const [state, setState] = useState<ChatState>("landing");
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const [awaiting, setAwaiting] = useState<"recipient" | "amount" | null>(null);
   const [candidates, setCandidates] = useState<Contact[] | null>(null);
@@ -74,6 +83,12 @@ export function ChatView({ userName, onMicClick }: { userName: string, onMicClic
   const addMessage = (role: "user" | "assistant", text: string) => {
     setMessages((prev: any) => [...prev, { id: crypto.randomUUID(), role, text }]);
   };  
+
+  useEffect(() => {
+    if (state === "landing" && messages.length > 0) {
+      go("disambiguation");
+    }
+  }, [messages, state]);
 
   const go = (next: ChatState) => setState(next);
 

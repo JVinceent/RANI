@@ -21,7 +21,7 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
-  const [messages, setMessages] = useState<{ id: number; sender: "user" | "rani"; text: string }[]>([]);
+  const [messages, setMessages] = useState<{ id: string; role: "user" | "assistant"; text: string }[]>([]);
 
   const [isDarkMode, setIsDarkMode] = useState(true);
 
@@ -134,6 +134,8 @@ export default function App() {
               <ChatView 
                 userName={userName ?? "there"} 
                 onMicClick={() => setActiveView("voice")} 
+                messages={messages}
+                setMessages={setMessages}
               />
             </PageTransition>
           )}
