@@ -1,13 +1,12 @@
 import { Router } from 'express';
-import multer = require('multer');
+import multer from 'multer';
 
 const router = Router();
-
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/', upload.single('audio') as any, async (req, res) => {
+// @ts-ignore - for TypeScript to ignore the middleware type mismatch
+router.post('/', upload.single('audio'), async (req, res) => {
   try {
-    // Grabs the file from the incoming request
     const audioFile = req.file;
 
     if (!audioFile) {
@@ -17,7 +16,6 @@ router.post('/', upload.single('audio') as any, async (req, res) => {
     console.log('🎤 Received audio file:', audioFile.originalname);
     console.log('📦 File size:', audioFile.size, 'bytes');
 
-    // Sends a temporary success response back to the frontend
     res.json({ 
       success: true, 
       userTranscription: "Testing, testing, 1 2 3!", 

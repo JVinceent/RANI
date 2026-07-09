@@ -57,7 +57,7 @@ type ChatMessage = {
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
 
-export function ChatView({ userName }: { userName: string }) {
+export function ChatView({ userName, onMicClick }: { userName: string, onMicClick: () => void }) {
   const [state, setState] = useState<ChatState>("landing");
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -451,6 +451,7 @@ if (awaiting === "amount") {
           />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <button
+            onClick={onMicClick}
               style={{
                 width: 36,
                 height: 36,

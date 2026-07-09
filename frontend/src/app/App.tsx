@@ -131,7 +131,7 @@ export default function App() {
         <AnimatePresence mode="wait">
           {activeView === "chat" && (
             <PageTransition key="chat">
-              <ChatView userName={userName ?? "there"} />
+              <ChatView userName={userName ?? "there"} onMicClick={() => setActiveView("voice")} />
             </PageTransition>
           )}
           {activeView === "contacts" && (
