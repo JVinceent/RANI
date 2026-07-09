@@ -52,7 +52,20 @@ cp backend/.env.example backend/.env   # fill in SUPABASE_URL, SUPABASE_SERVICE_
 npm run dev
 ```
 
-Backend: `http://localhost:4000` · Frontend: `http://localhost:5173`
+Backend: `http://localhost:4000` · Frontend: `http://localhost:5173` (copy `frontend/.env.example` → `frontend/.env.local`).
+
+## Deployment (Vercel — frontend)
+
+The root `vercel.json` builds the Vite app from `frontend/` and serves it as an SPA — import the repo into Vercel with the **repo root** as the project root (no Root Directory override needed).
+
+Required Vercel **Environment Variable**:
+
+- `VITE_API_URL` → the deployed backend's base URL (e.g. `https://rani-backend.onrender.com`). It's build-time (Vite inlines it), so redeploy after changing it.
+
+The **backend** runs separately on any long-running host (Render / Railway / Fly — its `/transactions/submit` polls up to 60s, which doesn't fit serverless). On that host set:
+
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, a strong `JWT_SECRET`, the Stellar vars from `backend/.env.example`, and
+- `CORS_ORIGINS` → your Vercel URL (e.g. `https://rani.vercel.app`) so the deployed frontend is allowed to call the API. (Localhost ports are always allowed in dev.)
 
 ## Database
 
