@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowDownLeft, Shield, CheckCircle, X, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -9,8 +10,8 @@ interface Notification {
   icon: React.ElementType;
   iconBg: string;
   iconColor: string;
-  title: string;
-  body: string;
+  titleKey: "notif.paymentReceivedTitle" | "notif.securityAlertTitle" | "notif.txSettledTitle";
+  bodyKey: "notif.paymentReceivedBody" | "notif.securityAlertBody" | "notif.txSettledBody";
   time: string;
   unread: boolean;
 }
@@ -21,8 +22,8 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     icon: ArrowDownLeft,
     iconBg: "rgba(34,197,94,0.14)",
     iconColor: "#4ADE80",
-    title: "Payment Received",
-    body: "Received ₱500 from Juan Reyes",
+    titleKey: "notif.paymentReceivedTitle",
+    bodyKey: "notif.paymentReceivedBody",
     time: "2 min ago",
     unread: true,
   },
@@ -31,8 +32,8 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     icon: Shield,
     iconBg: "rgba(245,158,11,0.14)",
     iconColor: "#F59E0B",
-    title: "Security Alert",
-    body: "Security: New device signed in.",
+    titleKey: "notif.securityAlertTitle",
+    bodyKey: "notif.securityAlertBody",
     time: "1 hour ago",
     unread: true,
   },
@@ -41,8 +42,8 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     icon: CheckCircle,
     iconBg: "rgba(37,99,235,0.14)",
     iconColor: "#60A5FA",
-    title: "Transaction Settled",
-    body: "Transaction settled in 4.2s.",
+    titleKey: "notif.txSettledTitle",
+    bodyKey: "notif.txSettledBody",
     time: "Just now",
     unread: true,
   },
@@ -61,6 +62,7 @@ export function NotificationsDropdown({
   onClose,
   onMarkAllRead,
 }: NotificationsDropdownProps) {
+  const { t } = useLanguage();
   const [items, setItems] = useState(INITIAL_NOTIFICATIONS);
 
   const markAllRead = () => {
@@ -111,7 +113,7 @@ export function NotificationsDropdown({
               fontFamily: FF,
             }}
           >
-            Notifications
+            {t("notifDropdown.title")}
           </div>
           {unreadCount > 0 && (
             <div
@@ -158,7 +160,7 @@ export function NotificationsDropdown({
             onMouseEnter={(e) => (e.currentTarget.style.color = "#60A5FA")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#2563EB")}
           >
-            Mark all as read
+            {t("notifDropdown.markAllRead")}
           </button>
           <button
             onClick={onClose}
@@ -249,7 +251,7 @@ export function NotificationsDropdown({
                     marginBottom: 3,
                   }}
                 >
-                  {notif.title}
+                  {t(notif.titleKey)}
                 </div>
                 <div
                   style={{
@@ -262,7 +264,7 @@ export function NotificationsDropdown({
                     transition: "color 200ms",
                   }}
                 >
-                  {notif.body}
+                  {t(notif.bodyKey)}
                 </div>
                 <div
                   style={{
@@ -300,7 +302,7 @@ export function NotificationsDropdown({
           onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
           onMouseLeave={(e) => (e.currentTarget.style.color = "#4A6080")}
         >
-          View all notifications
+          {t("notifDropdown.viewAll")}
         </button>
       </div>
     </motion.div>

@@ -78,3 +78,4 @@ alter table contacts enable row level security;
 alter table transactions enable row level security;
 alter table spending_limits enable row level security;
 alter table audit_log enable row level security;
+alter table users add column language text not null default 'en-US';

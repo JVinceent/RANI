@@ -4,6 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { Header } from "./Header";
 import { AddContactModal } from "./AddContactModal";
 import { addContact } from "../../lib/api";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -16,7 +17,24 @@ const CONTACTS = [
   { id: "6", initials: "LC", name: "Liza Corpuz", handle: "@lizacorpuz", address: "GJCDE5OP7RSTU9XY2ZA4BCD6EF", tag: "Friend", tagColor: "#60A5FA", tagBg: "rgba(37,99,235,0.12)", avatarColor: "#60A5FA", avatarBg: "rgba(37,99,235,0.12)", lastSent: "3mo ago" },
 ];
 
+function formatRelativeTime(raw: string, language: "en-US" | "fil"): string {
+  if (language !== "fil") return raw;
+
+  const match = raw.match(/^(\d+)(h|d|w|mo)\s*ago$/);
+  if (!match) return raw;
+
+  const [, num, unit] = match;
+  const units: Record<string, string> = {
+    h: "oras",
+    d: "araw",
+    w: "linggo",
+    mo: "buwan",
+  };
+  return `${num} ${units[unit]} ang nakaraan`;
+}
+
 export function ContactsView() {
+  const { t, language } = useLanguage();
   const [search, setSearch] = useState("");
   const [hovered, setHovered] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -41,15 +59,15 @@ export function ContactsView() {
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 28px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
         <div>
-          <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Contacts</div>
-          <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{CONTACTS.length} saved on Stellar</div>
+          <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>{t("contacts.title")}</div>
+          <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 3 }}>{t("contacts.savedOnStellar", { count: String(CONTACTS.length) })}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 10, padding: "8px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", width: 220 }}>
             <Search size={13} color="#4A6080" />
             <input
               type="text"
-              placeholder="Search contacts…"
+              placeholder={t("contacts.search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ flex: 1, outline: "none", background: "transparent", border: "none", color: "#E2EEFF", fontSize: 13, fontFamily: FF }}
@@ -62,14 +80,14 @@ export function ContactsView() {
             onMouseLeave={(e) => (e.currentTarget.style.background = "#2563EB")}
           >
             <UserPlus size={14} color="#fff" />
-            Add New Contact
+            {t("contacts.addNew")}
           </button>
         </div>
       </div>
 
       {/* Column headers */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 2.6fr 1fr 1fr 80px", padding: "10px 28px", flexShrink: 0 }}>
-        {["Contact", "Stellar Address", "Tag", "Last Sent", ""].map((col) => (
+        {[t("contacts.colContact"), t("contacts.colAddress"), t("contacts.colTag"), t("contacts.colLastSent"), ""].map((col) => (
           <div key={col} style={{ color: "#2A3F5C", fontSize: 10, fontWeight: 700, fontFamily: FF, letterSpacing: "0.09em", textTransform: "uppercase" }}>
             {col}
           </div>
@@ -113,12 +131,12 @@ export function ContactsView() {
               </span>
               <button
                 onClick={() => copy(c.id, c.address)}
-                title="Copy"
+                title={t("contacts.copy")}
                 style={{ width: 24, height: 24, borderRadius: 6, background: copied === c.id ? "rgba(34,197,94,0.08)" : "transparent", border: copied === c.id ? "1px solid rgba(34,197,94,0.2)" : "1px solid transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}
               >
                 <Copy size={11} color={copied === c.id ? "#4ADE80" : "#4A6080"} />
               </button>
-              <a href="#" title="Explorer" style={{ width: 24, height: 24, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
+              <a href="#" title={t("contacts.explorer")} style={{ width: 24, height: 24, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
                 <ExternalLink size={11} color="#4A6080" />
               </a>
             </div>
@@ -135,13 +153,13 @@ export function ContactsView() {
             </div>
 
             {/* Last sent */}
-            <div style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{c.lastSent}</div>
+            <div style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{formatRelativeTime(c.lastSent, language)}</div>
 
             {/* Send */}
             <div style={{ display: "flex", justifyContent: "flex-end", opacity: hovered === c.id ? 1 : 0, transition: "opacity 150ms" }}>
               <button style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 8, background: "#2563EB", border: "none", cursor: "pointer", color: "#fff", fontSize: 12, fontWeight: 600, fontFamily: FF }}>
                 <Send size={11} color="#fff" />
-                Send
+                {t("contacts.send")}
               </button>
             </div>
           </div>
@@ -152,8 +170,8 @@ export function ContactsView() {
             <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Search size={22} color="#2A3F5C" />
             </div>
-            <div style={{ color: "#E2EEFF", fontSize: 15, fontWeight: 600, fontFamily: FF }}>No contacts found</div>
-            <div style={{ color: "#2A3F5C", fontSize: 13, fontFamily: FF }}>Try a different search term.</div>
+              <div style={{ color: "#E2EEFF", fontSize: 15, fontWeight: 600, fontFamily: FF }}>{t("contacts.noneFound")}</div>
+              <div style={{ color: "#2A3F5C", fontSize: 13, fontFamily: FF }}>{t("contacts.tryDifferentSearch")}</div>
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { Shield, X, Lock, AlertCircle, ChevronRight } from "lucide-react";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -8,6 +9,7 @@ interface ConfirmationModalProps {
 }
 
 export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProps) {
+  const { t } = useLanguage();
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#070F1C", position: "relative", overflow: "hidden" }}>
       {/* Blurred chat preview bg */}
@@ -94,10 +96,10 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
                 <Shield size={22} color="#fff" strokeWidth={1.8} />
               </div>
               <div>
-                <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>Confirm Payment</div>
+                <div style={{ color: "#F0F6FF", fontSize: 18, fontWeight: 600, fontFamily: FF }}>{t("confirm.title")}</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 3 }}>
                   <Lock size={10} color="#22C55E" />
-                  <span style={{ color: "#22C55E", fontSize: 11, fontFamily: FF }}>Secured by Stellar</span>
+                  <span style={{ color: "#22C55E", fontSize: 11, fontFamily: FF }}>{t("confirm.securedByStellar")}</span>
                 </div>
               </div>
             </div>
@@ -118,7 +120,7 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
                   <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                    You Send
+                    {t("confirm.youSend")}
                   </div>
                   <div style={{ color: "#F0F6FF", fontSize: 30, fontWeight: 700, fontFamily: FF, lineHeight: 1.1, marginTop: 3, letterSpacing: "-0.01em" }}>
                     ₱500.00
@@ -127,7 +129,7 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
                 <ChevronRight size={18} color="#2A3F5C" />
                 <div style={{ textAlign: "right" }}>
                   <div style={{ color: "#2A3F5C", fontSize: 10, fontFamily: FF, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                    Recipient Gets
+                    {t("confirm.recipientGets")}
                   </div>
                   <div style={{ color: "#60A5FA", fontSize: 26, fontWeight: 700, fontFamily: FF, lineHeight: 1.1, marginTop: 3, letterSpacing: "-0.01em" }}>
                     8.5 USDC
@@ -139,10 +141,10 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
             {/* Detail rows */}
             <div style={{ marginBottom: 16 }}>
               {[
-                { label: "Recipient", value: "Maria Santos", sub: "GBXYZ...4A2M" },
-                { label: "Network Fee", value: "₱0.0004", sub: "≈ 0.0000685 XLM" },
-                { label: "Memo", value: "dinner", sub: null },
-                { label: "Est. Arrival", value: "< 5 seconds", sub: "Stellar network" },
+                { label: t("confirm.recipient"), value: "Maria Santos", sub: "GBXYZ...4A2M" },
+                { label: t("confirm.networkFee"), value: "₱0.0004", sub: "≈ 0.0000685 XLM" },
+                { label: t("confirm.memo"), value: "dinner", sub: null },
+                { label: t("confirm.estArrival"), value: t("confirm.estArrivalValue"), sub: t("confirm.network") },
               ].map(({ label, value, sub }, i, arr) => (
                 <div
                   key={label}
@@ -175,7 +177,7 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
             >
               <AlertCircle size={13} color="#F59E0B" style={{ flexShrink: 0, marginTop: 1 }} />
               <p style={{ color: "#92400E", fontSize: 12, fontFamily: FF, lineHeight: 1.5, margin: 0 }}>
-                This transaction is irreversible. Please verify the recipient before confirming.
+                {t("confirm.warning")}
               </p>
             </div>
 
@@ -202,7 +204,7 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
                 }}
               >
                 <Lock size={14} color="rgba(255,255,255,0.7)" />
-                Confirm Payment
+                {t("confirm.confirmButton")}
               </button>
               <button
                 onClick={onCancel}
@@ -218,7 +220,7 @@ export function ConfirmationModal({ onConfirm, onCancel }: ConfirmationModalProp
                   fontFamily: FF,
                 }}
               >
-                Cancel
+                {t("confirm.cancel")}
               </button>
             </div>
           </div>

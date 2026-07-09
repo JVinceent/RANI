@@ -5,9 +5,11 @@ import {
   Lock, Plus, Trash2, Check, ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { saveName, saveEmail } from "../../lib/api";
+import { saveName, saveEmail, saveLanguage } from "../../lib/api";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
+import { LANGUAGES } from "../../lib/i18n/translations";
 
-const FF = "'DM Sans', sans-serif";
+const FF = "'DM Sans', sans-serif";7
 
 /* ─── Types ─────────────────────────────────────────────────────── */
 
@@ -18,13 +20,15 @@ type SettingsTab =
   | "notifications"
   | "language";
 
-const TABS: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
-  { id: "profile", label: "Profile", icon: User },
-  { id: "wallet", label: "Wallet", icon: Wallet },
-  { id: "security", label: "Security", icon: Shield },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "language", label: "Language", icon: Globe },
-];
+function getTabs(t: (key: any) => string): { id: SettingsTab; label: string; icon: React.ElementType }[] {
+  return [
+    { id: "profile", label: t("settings.profile"), icon: User },
+    { id: "wallet", label: t("settings.wallet"), icon: Wallet },
+    { id: "security", label: t("settings.security"), icon: Shield },
+    { id: "notifications", label: t("settings.notifications"), icon: Bell },
+    { id: "language", label: t("settings.language"), icon: Globe },
+  ];
+}
 
 interface FullSettingsViewProps {
   defaultTab?: SettingsTab;
@@ -179,6 +183,9 @@ function SettingsSubNav({
   activeTab: SettingsTab;
   onTabChange: (t: SettingsTab) => void;
 }) {
+  const { t } = useLanguage();
+  const TABS = getTabs(t);
+
   return (
     <div
       style={{
@@ -204,7 +211,7 @@ function SettingsSubNav({
           padding: "0 12px 14px",
         }}
       >
-        Settings
+        {t("settings.title")}
       </div>
 
       {TABS.map(({ id, label, icon: Icon }) => {
@@ -266,6 +273,7 @@ interface ProfileVariantProps {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function ProfileVariant({ userName, onNameChange, userEmail, onEmailChange }: ProfileVariantProps) {
+  const { t } = useLanguage();
   const [displayName, setDisplayName] = useState(userName);
   const [displayEmail, setDisplayEmail] = useState(userEmail);
   const [showAddress, setShowAddress] = useState(true);
@@ -308,7 +316,7 @@ function ProfileVariant({ userName, onNameChange, userEmail, onEmailChange }: Pr
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <SectionTitle>Profile</SectionTitle>
+      <SectionTitle>{t("settings.profile")}</SectionTitle>
 
       {/* Avatar */}
       <div
@@ -361,7 +369,7 @@ function ProfileVariant({ userName, onNameChange, userEmail, onEmailChange }: Pr
 
       {/* Input fields */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
-        <FieldGroup label="Display Name">
+        <FieldGroup label={t("profile.displayName")}>
           <input
             type="text"
             value={displayName}
@@ -374,7 +382,7 @@ function ProfileVariant({ userName, onNameChange, userEmail, onEmailChange }: Pr
           />
         </FieldGroup>
 
-        <FieldGroup label="Email">
+        <FieldGroup label={t("profile.email")}>
           <input
             type="email"
             placeholder="hello@example.com"
@@ -424,10 +432,10 @@ function ProfileVariant({ userName, onNameChange, userEmail, onEmailChange }: Pr
               marginBottom: 4,
             }}
           >
-            Show public address to contacts
+            {t("profile.showAddress")}
           </div>
           <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, lineHeight: 1.5 }}>
-            Let contacts see your Stellar address when they search your name.
+            {t("profile.showAddressHint")}
           </div>
           {showAddress && (
             <motion.div
@@ -518,12 +526,13 @@ const WALLET_ASSETS = [
 ];
 
 function WalletVariant() {
+  const { t } = useLanguage();
   const [assets, setAssets] = useState(WALLET_ASSETS);
   const [hoverCard, setHoverCard] = useState<string | null>(null);
 
   return (
     <div style={{ maxWidth: 860 }}>
-      <SectionTitle>Connected Wallets</SectionTitle>
+      <SectionTitle>{t("wallet.connectedWallets")}</SectionTitle>
 
       <div
         style={{
@@ -683,7 +692,7 @@ function WalletVariant() {
               onMouseLeave={(e) => (e.currentTarget.style.color = "#EF4444")}
             >
               <Trash2 size={12} color="currentColor" />
-              Disconnect
+                {t("wallet.disconnect")}
             </button>
           </div>
         ))}
@@ -716,7 +725,7 @@ function WalletVariant() {
         }}
       >
         <Plus size={16} color="#60A5FA" />
-        Connect new wallet
+          {t("wallet.connectNew")}
       </button>
     </div>
   );
@@ -727,6 +736,7 @@ function WalletVariant() {
 ═══════════════════════════════════════════════════════════════════ */
 
 function SecurityVariant() {
+  const { t } = useLanguage();
   const [requireConfirm, setRequireConfirm] = useState(true);
   const [dailyLimit, setDailyLimit] = useState(true);
   const [limitAmount, setLimitAmount] = useState("5,000");
@@ -735,7 +745,7 @@ function SecurityVariant() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <SectionTitle>Security</SectionTitle>
+      <SectionTitle>{t("settings.security")}</SectionTitle>
 
       {/* Panel */}
       <div
@@ -748,13 +758,13 @@ function SecurityVariant() {
         }}
       >
         <PanelHeader icon={<Lock size={13} color="#60A5FA" />}>
-          Transaction Guardrails
+          {t("security.guardrails")}
         </PanelHeader>
 
         <div style={{ padding: "20px 24px" }}>
           <ToggleRow
-            title="Require confirmation before sending"
-            description="Every payment will display a review step before processing."
+            title={t("security.requireConfirmTitle")}
+            description={t("security.requireConfirmDesc")}
             enabled={requireConfirm}
             onToggle={() => setRequireConfirm((v) => !v)}
           />
@@ -766,8 +776,8 @@ function SecurityVariant() {
             }}
           />
           <ToggleRow
-            title="Biometric authentication"
-            description="Use Face ID or fingerprint to authorize each payment."
+            title={t("security.biometricTitle")}
+            description={t("security.biometricDesc")}
             enabled={biometrics}
             onToggle={() => setBiometrics((v) => !v)}
           />
@@ -785,13 +795,13 @@ function SecurityVariant() {
         }}
       >
         <PanelHeader icon={<Shield size={13} color="#60A5FA" />}>
-          Spending Limits
+          {t("security.spendingLimits")}
         </PanelHeader>
 
         <div style={{ padding: "20px 24px" }}>
           <ToggleRow
-            title="Daily Spending Limit"
-            description="Block transactions that would exceed your configured daily threshold."
+            title={t("security.dailyLimitTitle")}
+            description={t("security.dailyLimitDesc")}
             enabled={dailyLimit}
             onToggle={() => setDailyLimit((v) => !v)}
           />
@@ -818,7 +828,7 @@ function SecurityVariant() {
                       marginBottom: 10,
                     }}
                   >
-                    Limit Amount
+                    {t("security.limitAmount")}
                   </label>
                   <div
                     style={{
@@ -864,7 +874,7 @@ function SecurityVariant() {
                       }}
                     />
                     <span style={{ color: "#3A5070", fontSize: 12, fontFamily: FF }}>
-                      PHP / day
+                      {t("security.perDay")}
                     </span>
                   </div>
                 </div>
@@ -884,6 +894,7 @@ function SecurityVariant() {
 ═══════════════════════════════════════════════════════════════════ */
 
 function NotificationsVariant() {
+  const { t } = useLanguage();
   const [txAlerts, setTxAlerts] = useState(true);
   const [secAlerts, setSecAlerts] = useState(true);
   const [marketing, setMarketing] = useState(false);
@@ -891,7 +902,7 @@ function NotificationsVariant() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <SectionTitle>Notifications</SectionTitle>
+      <SectionTitle>{t("settings.notifications")}</SectionTitle>
 
       <div
         style={{
@@ -903,15 +914,15 @@ function NotificationsVariant() {
         }}
       >
         <PanelHeader icon={<Bell size={13} color="#60A5FA" />}>
-          Alert Preferences
+          {t("notifications.alertPreferences")}
         </PanelHeader>
 
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 0 }}>
           {[
-            { title: "Transaction alerts", desc: "Receive a notification for every send and receive.", enabled: txAlerts, toggle: () => setTxAlerts(v => !v) },
-            { title: "Security alerts", desc: "Get notified when a new device signs in or something looks unusual.", enabled: secAlerts, toggle: () => setSecAlerts(v => !v) },
-            { title: "Marketing updates", desc: "Product news, tips, and feature announcements.", enabled: marketing, toggle: () => setMarketing(v => !v) },
-            { title: "Notification sounds", desc: "Play a sound when you receive a transaction or alert.", enabled: sound, toggle: () => setSound(v => !v) },
+            { title: t("notifications.txAlertsTitle"), desc: t("notifications.txAlertsDesc"), enabled: txAlerts, toggle: () => setTxAlerts(v => !v) },
+            { title: t("notifications.secAlertsTitle"), desc: t("notifications.secAlertsDesc"), enabled: secAlerts, toggle: () => setSecAlerts(v => !v) },
+            { title: t("notifications.marketingTitle"), desc: t("notifications.marketingDesc"), enabled: marketing, toggle: () => setMarketing(v => !v) },
+            { title: t("notifications.soundTitle"), desc: t("notifications.soundDesc"), enabled: sound, toggle: () => setSound(v => !v) },
           ].map(({ title, desc, enabled, toggle }, i, arr) => (
             <div key={title}>
               <ToggleRow
@@ -943,17 +954,29 @@ function NotificationsVariant() {
    VARIANT E — LANGUAGE
 ═══════════════════════════════════════════════════════════════════ */
 
-const LANGUAGES = [
-  { code: "en-US", name: "English", region: "United States" },
-  { code: "fil", name: "Filipino", region: "Tagalog" },
-];
-
 function LanguageVariant() {
-  const [selected, setSelected] = useState("en-US");
+  const { language, setLanguage, t } = useLanguage();
+  const [selected, setSelected] = useState(language);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    if (saving || selected === language) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const result = await saveLanguage(selected);
+      setLanguage(result.language as typeof language);
+    } catch (e: any) {
+      setSaveError(e.message ?? "Could not save your language.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <SectionTitle>Language</SectionTitle>
+      <SectionTitle>{t("language.title")}</SectionTitle>
 
       <div
         style={{
@@ -965,7 +988,7 @@ function LanguageVariant() {
         }}
       >
         <PanelHeader icon={<Globe size={13} color="#60A5FA" />}>
-          Display Language
+          {t("language.displayLanguage")}
         </PanelHeader>
 
         <div>
@@ -1025,8 +1048,12 @@ function LanguageVariant() {
           ))}
         </div>
       </div>
-
-      <SaveButton />
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <SaveButton onClick={handleSave} saving={saving} />
+        {saveError && (
+          <span style={{ color: "#F87171", fontSize: 13, fontFamily: FF }}>{saveError}</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -1230,6 +1257,7 @@ function SaveButton({
   onClick?: () => void;
   saving?: boolean;
 }) {
+  const { t } = useLanguage();
   const [hover, setHover] = useState(false);
   return (
     <button
@@ -1252,7 +1280,7 @@ function SaveButton({
         boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
       }}
     >
-      {saving ? "Saving…" : "Save changes"}
+      {saving ? t("profile.saving") : t("profile.saveChanges")}
     </button>
   );
 }

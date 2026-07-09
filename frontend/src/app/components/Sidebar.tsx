@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { NotificationsDropdown } from "./NotificationsDropdown";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -25,21 +26,21 @@ interface SidebarProps {
   onNavigate: (view: AppView) => void;
 }
 
-const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
-  { id: "chat", icon: MessageSquare, label: "Chat" },
-  { id: "contacts", icon: Users, label: "Contacts" },
-  { id: "history", icon: Clock, label: "History" },
-  { id: "voice", icon: Mic, label: "Voice" },
-];
-
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
+  const { t } = useLanguage();
+  const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
+    { id: "chat", icon: MessageSquare, label: t("nav.chat") },
+    { id: "contacts", icon: Users, label: t("nav.contacts") },
+    { id: "history", icon: Clock, label: t("nav.history") },
+    { id: "voice", icon: Mic, label: t("nav.voice") },
+  ];
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
+  const [unreadCount, setUnreadCount] = useState(3); // starting badge count
 
   const handleBellClick = () => setShowNotifications((v) => !v);
-  const handleMarkAllRead = () => setUnreadCount(0);
   const handleCloseNotifications = () => setShowNotifications(false);
-
+  const handleMarkAllRead = () => setUnreadCount(0);
+  
   return (
     <>
       {/* ── Sidebar column ── */}

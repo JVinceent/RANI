@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Lock, X, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -184,6 +185,7 @@ function FormStep({
   usdcAmt: string;
   onAuthorize: () => void;
 }) {
+  const { t } = useLanguage();
   const [hover, setHover] = useState(false);
   const [focused, setFocused] = useState(false);
   const isValid = !!amount && parseFloat(amount) >= 100;
@@ -211,16 +213,15 @@ function FormStep({
           </div>
           <div>
             <div style={{ color: "#F0F6FF", fontSize: 16, fontWeight: 600, fontFamily: FF }}>
-              Deposit via GCash
+              {t("sep24.depositTitle")}
             </div>
             <div style={{ color: "#3A5070", fontSize: 12, fontFamily: FF, marginTop: 1 }}>
-              Stellar Anchor (SEP-24)
+              {t("sep24.anchorSubtitle")}
             </div>
           </div>
         </div>
         <p style={{ color: "#7B92B0", fontSize: 13, fontFamily: FF, lineHeight: 1.55, margin: 0 }}>
-          Funds deposited via GCash will be converted to USDC and credited
-          to your Stellar wallet instantly.
+          {t("sep24.description")}
         </p>
       </div>
 
@@ -241,7 +242,7 @@ function FormStep({
             marginBottom: 8,
           }}
         >
-          Amount in PHP
+          {t("sep24.amountLabel")}
         </label>
         <div
           style={{
@@ -293,11 +294,11 @@ function FormStep({
           }}
         >
           <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}>
-            Min: ₱100 · Max: ₱50,000
+            {t("sep24.minMax")}
           </span>
           {!isValid && amount && (
             <span style={{ color: "#F87171", fontSize: 11, fontFamily: FF }}>
-              Minimum ₱100
+              {t("sep24.minimumError")}
             </span>
           )}
         </div>
@@ -317,9 +318,9 @@ function FormStep({
         }}
       >
         {[
-          { label: "Exchange Rate", value: "₱1 = 0.0121 USDC" },
-          { label: "Anchor Fee", value: "₱15.00" },
-          { label: "Est. Arrival", value: "~2 minutes" },
+          { label: t("sep24.exchangeRate"), value: "₱1 = 0.0121 USDC" },
+          { label: t("sep24.anchorFee"), value: "₱15.00" },
+          { label: t("sep24.estArrival"), value: t("sep24.estArrivalValue") },
         ].map(({ label, value }) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>{label}</span>
@@ -356,7 +357,7 @@ function FormStep({
           boxShadow: isValid ? "0 6px 20px rgba(0,166,81,0.3)" : "none",
         }}
       >
-        Authorize GCash Deposit
+        {t("sep24.authorizeButton")}
       </button>
 
       {/* Security note */}
@@ -370,7 +371,7 @@ function FormStep({
       >
         <Lock size={10} color="#2A3F5C" />
         <span style={{ color: "#2A3F5C", fontSize: 11, fontFamily: FF }}>
-          256-bit encrypted · Stellar SEP-24 compliant
+          {t("sep24.encryptedNote")}
         </span>
       </div>
     </>
@@ -382,6 +383,7 @@ function FormStep({
 ═══════════════════════════════════════════════════════════════════ */
 
 function ProcessingStep() {
+  const { t } = useLanguage();
   return (
     <div
       style={{
@@ -432,12 +434,12 @@ function ProcessingStep() {
             marginBottom: 8,
           }}
         >
-          Connecting to GCash...
+          {t("sep24.connecting")}
         </div>
         <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, lineHeight: 1.5 }}>
-          Please complete the payment in your GCash app.
+          {t("sep24.completeInApp")}
           <br />
-          Do not close this window.
+          {t("sep24.doNotClose")}
         </div>
       </div>
 
@@ -472,7 +474,7 @@ function ProcessingStep() {
         }}
       >
         <span style={{ color: "#4A6080", fontSize: 12, fontFamily: FF }}>
-          Step 2 of 3 — Awaiting GCash authorization
+          {t("sep24.stepAwaiting")}
         </span>
       </div>
     </div>
@@ -492,6 +494,7 @@ function SuccessStep({
   usdcAmt: string;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const [hover, setHover] = useState(false);
   const displayAmt = amount ? parseFloat(amount).toLocaleString() : "0";
 
@@ -520,7 +523,7 @@ function SuccessStep({
       {/* Amount display */}
       <div style={{ textAlign: "center" }}>
         <div style={{ color: "#4ADE80", fontSize: 18, fontWeight: 700, fontFamily: FF, marginBottom: 6 }}>
-          Deposit Initiated!
+          {t("sep24.depositInitiated")}
         </div>
         <div
           style={{
@@ -535,7 +538,7 @@ function SuccessStep({
           ₱{displayAmt}
         </div>
         <div style={{ color: "#4A6080", fontSize: 13, fontFamily: FF, marginTop: 6 }}>
-          ≈ {usdcAmt} USDC · arrives in ~2 minutes
+          ≈ {usdcAmt} USDC · {t("sep24.arrivesInSuffix")}
         </div>
       </div>
 
@@ -553,11 +556,11 @@ function SuccessStep({
         }}
       >
         {[
-          { label: "Method", value: "GCash" },
-          { label: "PHP Sent", value: `₱${displayAmt}` },
-          { label: "USDC Received", value: `${usdcAmt} USDC` },
-          { label: "Fee", value: "₱15.00" },
-          { label: "Status", value: "Processing ✓" },
+          { label: t("sep24.method"), value: "GCash" },
+          { label: t("sep24.phpSent"), value: `₱${displayAmt}` },
+          { label: t("sep24.usdcReceived"), value: `${usdcAmt} USDC` },
+          { label: t("sep24.fee"), value: "₱15.00" },
+          { label: t("sep24.status"), value: t("sep24.processingStatus") },
         ].map(({ label, value }) => (
           <div
             key={label}
@@ -590,7 +593,7 @@ function SuccessStep({
           transition: "background 150ms",
         }}
       >
-        Return to Rani
+        {t("sep24.returnToRani")}
       </button>
     </div>
   );

@@ -13,6 +13,7 @@ import { Header } from "./Header";
 import { SEP24Modal } from "./SEP24Modal";
 //import { buildTransaction, submitTransaction, getBalance, type Contact } from "../../lib/api";
 import { getBalance, addContact, parseCommand, type Contact } from "../../lib/api";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 
 const FF = "'DM Sans', sans-serif";
@@ -59,6 +60,7 @@ type ChatMessage = {
 ═══════════════════════════════════════════════════════════════════ */
 
 export function ChatView({ userName }: { userName: string }) {
+  const { t } = useLanguage();
   const [state, setState] = useState<ChatState>("landing");
   const [showSEP24, setShowSEP24] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -435,7 +437,7 @@ if (awaiting === "amount") {
         >
           <input
             type="text"
-            placeholder='Try "Send ₱200 to Juan" or ask Rani anything...'
+            placeholder={t("chat.placeholder")}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
@@ -519,6 +521,7 @@ function LandingState({
   onCashIn: () => void;
   onCheckBalance: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div
       style={{
@@ -580,7 +583,7 @@ function LandingState({
             lineHeight: 1.1,
           }}
         >
-          Hey, {userName}!
+        {t("chat.greeting", { name: userName })}
         </div>
         <div
           style={{
@@ -591,7 +594,7 @@ function LandingState({
             lineHeight: 1.6,
           }}
         >
-          Type a payment in plain language to get started.
+          {t("chat.subtitle")}
         </div>
       </div>
 
@@ -608,7 +611,7 @@ function LandingState({
           icon={<ArrowRight size={14} />}
           onClick={onSendMoney}
         >
-          Send Money
+          {t("chat.sendMoney")}
         </QuickPill>
 
         <QuickPill
@@ -616,11 +619,11 @@ function LandingState({
           icon={<Banknote size={14} />}
           onClick={onCashIn}
         >
-          Cash In (GCash)
+          {t("chat.cashIn")}
         </QuickPill>
 
         <QuickPill variant="ghost" icon={<Wallet size={14} />} onClick={onCheckBalance}>
-          Check Balance
+          {t("chat.checkBalance")}
         </QuickPill>
       </div>
     </div>

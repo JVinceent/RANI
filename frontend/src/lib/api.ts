@@ -28,7 +28,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ── Auth ──────────────────────────────────────────────────────────
 export async function connectFreighter(email: string, publicKey: string) {
-  const data = await request<{ token: string; userId: string; stellarPublicKey: string; name: string | null; email: string | null }>(
+  const data = await request<{
+    token: string;
+    userId: string;
+    stellarPublicKey: string;
+    name: string | null;
+    email: string | null;
+    language: string | null;
+  }>(
     "/auth/connect-freighter",
     { method: "POST", body: JSON.stringify({ email, publicKey }) }
   );
@@ -47,6 +54,13 @@ export async function saveEmail(email: string) {
   return request<{ email: string }>("/auth/email", {
     method: "PATCH",
     body: JSON.stringify({ email }),
+  });
+}
+
+export async function saveLanguage(language: string) {
+  return request<{ language: string }>("/auth/language", {
+    method: "PATCH",
+    body: JSON.stringify({ language }),
   });
 }
 

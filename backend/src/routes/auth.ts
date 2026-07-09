@@ -26,10 +26,14 @@ authRouter.post("/register", async (req, res) => {
   }
 
   const { data: user, error } = await supabase
-    .from("users")
-    .insert({ email, stellar_public_key: keypair.publicKey() })
-    .select()
-    .single();
+  .from("users")
+  .insert({
+    email,
+    stellar_public_key: keypair.publicKey(),
+    name: email.split("@")[0], // sensible default until they set a real name
+  })
+  .select()
+  .single();
 
   if (error) return res.status(500).json({ error: error.message });
 
@@ -52,13 +56,13 @@ authRouter.post("/connect-freighter", async (req, res) => {
   const { email, publicKey } = parsed.data;
 
   const { data: user, error } = await supabase
-    .from("users")
-    .upsert(
-      { email, stellar_public_key: publicKey },
-      { onConflict: "email" }
-    )
-    .select()
-    .single();
+  .from("users")
+  .upsert(
+    { email, stellar_public_key: publicKey },
+    { onConflict: "email" }
+  )
+  .select()
+  .single();
 
   if (error) return res.status(500).json({ error: error.message });
 
@@ -69,6 +73,7 @@ authRouter.post("/connect-freighter", async (req, res) => {
     stellarPublicKey: user.stellar_public_key,
     name: user.name ?? null,
     email: user.email ?? null,
+    language: user.language ?? "en-US",
   });
 });
 
@@ -110,3 +115,21 @@ authRouter.patch("/email", requireAuth, async (req: AuthedRequest, res) => {
 
   res.json({ email: user.email });
 });
+
+authRouter.patch("/language", requireAuth, async (req: AuthedRequest, res) => {
+  const schema = z.object({ language: z.enum(["en-US", "fil"]) });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const { data: user, error } = await supabase
+    .from("users")
+    .update({ language: parsed.data.language })
+    .eq("id", req.userId!)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.json({ language: user.language });
+});
+

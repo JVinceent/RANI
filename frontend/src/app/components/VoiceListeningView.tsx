@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { X, Check, ArrowRight, Wallet, Banknote } from "lucide-react";
 import { motion } from "motion/react";
 import { Header } from "./Header";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -115,6 +116,7 @@ export function VoiceListeningView({ userName = "there", onCancel }: VoiceListen
 ═══════════════════════════════════════════════════════════════════ */
 
 function VoiceBar({ onCancel }: { onCancel?: () => void }) {
+  const { t } = useLanguage();
   return (
     <div
       style={{
@@ -160,7 +162,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
             letterSpacing: "0.03em",
           }}
         >
-          Listening
+          {t("voice.listening")}
         </span>
       </div>
 
@@ -183,7 +185,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
             lineHeight: 1.2,
           }}
         >
-          "Send 500 pesos to...
+          {t("voice.transcriptPlaceholder")}
         </span>
         <motion.span
           animate={{ opacity: [1, 0, 1] }}
@@ -300,7 +302,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
           }
         >
           <X size={14} color="#7B92B0" />
-          Cancel
+          {t("voice.cancel")}
         </button>
 
         <button
@@ -328,7 +330,7 @@ function VoiceBar({ onCancel }: { onCancel?: () => void }) {
           }
         >
           <Check size={14} color="#fff" />
-          Done
+          {t("voice.done")}
         </button>
       </div>
     </div>

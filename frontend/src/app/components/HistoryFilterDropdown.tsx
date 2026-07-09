@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -41,6 +42,7 @@ export function HistoryFilterDropdown({
   onApply,
   initialFilters = DEFAULT_FILTERS,
 }: HistoryFilterDropdownProps) {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<FilterState>(initialFilters);
 
   const toggle = (key: keyof FilterState) =>
@@ -93,7 +95,7 @@ export function HistoryFilterDropdown({
             fontFamily: FF,
           }}
         >
-          Filters
+          {t("historyFilter.title")}
         </span>
         {activeCount < 7 && (
           <button
@@ -111,21 +113,21 @@ export function HistoryFilterDropdown({
             onMouseEnter={(e) => (e.currentTarget.style.color = "#7B92B0")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#3A5070")}
           >
-            Reset
+            {t("historyFilter.reset")}
           </button>
         )}
       </div>
 
       {/* ── Type ── */}
-      <FilterSection label="Type">
+      <FilterSection label={t("historyFilter.type")}>
         <FilterCheckbox
-          label="Sent"
+          label={t("historyFilter.sent")}
           checked={filters.sent}
           onToggle={() => toggle("sent")}
           accent="#60A5FA"
         />
         <FilterCheckbox
-          label="Received"
+          label={t("historyFilter.received")}
           checked={filters.received}
           onToggle={() => toggle("received")}
           accent="#4ADE80"
@@ -135,15 +137,15 @@ export function HistoryFilterDropdown({
       <SectionDivider />
 
       {/* ── Status ── */}
-      <FilterSection label="Status">
+      <FilterSection label={t("historyFilter.status")}>
         <FilterCheckbox
-          label="Settled"
+          label={t("historyFilter.settled")}
           checked={filters.settled}
           onToggle={() => toggle("settled")}
           accent="#22C55E"
         />
         <FilterCheckbox
-          label="Pending"
+          label={t("historyFilter.pending")}
           checked={filters.pending}
           onToggle={() => toggle("pending")}
           accent="#F59E0B"
@@ -153,27 +155,27 @@ export function HistoryFilterDropdown({
       <SectionDivider />
 
       {/* ── Asset ── */}
-      <FilterSection label="Asset">
+      <FilterSection label={t("historyFilter.asset")}>
         <FilterCheckbox
           label="XLM"
           checked={filters.xlm}
           onToggle={() => toggle("xlm")}
           accent="#93C5FD"
-          hint="Stellar Lumens"
+          hint={t("historyFilter.xlmHint")}
         />
         <FilterCheckbox
           label="USDC"
           checked={filters.usdc}
           onToggle={() => toggle("usdc")}
           accent="#60A5FA"
-          hint="USD Coin"
+          hint={t("historyFilter.usdcHint")}
         />
         <FilterCheckbox
           label="PHPC"
           checked={filters.phpc}
           onToggle={() => toggle("phpc")}
           accent="#4ADE80"
-          hint="Philippine Coin"
+          hint={t("historyFilter.phpcHint")}
         />
       </FilterSection>
 
@@ -202,7 +204,7 @@ export function HistoryFilterDropdown({
             (e.currentTarget.style.background = "#2563EB")
           }
         >
-          Apply Filters
+          {t("historyFilter.apply")}
         </button>
       </div>
     </motion.div>
