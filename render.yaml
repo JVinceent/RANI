@@ -13,8 +13,10 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      # Node 22+ required: @supabase/supabase-js needs a native global WebSocket,
+      # which Node 20 lacks (startup crashes in RealtimeClient otherwise).
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       # ── Secrets — set these in the Render dashboard (sync:false = not in git) ──
       - key: SUPABASE_URL
         sync: false
