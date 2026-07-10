@@ -27,6 +27,7 @@ interface SidebarProps {
   onNavigate: (view: AppView) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
+  userName?: string;
 }
 
 const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
@@ -36,9 +37,12 @@ const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
   { id: "voice", icon: Mic, label: "Voice" },
 ];
 
-export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme }: SidebarProps) {
+export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme, userName }: SidebarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
+  
+  const userInitial = userName?.trim()?.charAt(0)?.toUpperCase() || "?";
+
 
   const handleBellClick = () => setShowNotifications((v) => !v);
   const handleMarkAllRead = () => setUnreadCount(0);
@@ -347,7 +351,7 @@ export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme }: Sid
                 fontFamily: FF,
               }}
             >
-              R
+              {userInitial}
             </span>
           </button>
         </div>

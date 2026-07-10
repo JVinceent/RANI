@@ -119,6 +119,7 @@ export default function App() {
         onNavigate={setActiveView} 
         isDarkMode={isDarkMode} 
         toggleTheme={() => setIsDarkMode(!isDarkMode)} 
+        userName={userName ?? undefined}
       />
 
       <div
