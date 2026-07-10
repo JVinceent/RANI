@@ -13,8 +13,10 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      # Node 22+ required: @supabase/supabase-js needs a native global WebSocket,
+      # which Node 20 lacks (startup crashes in RealtimeClient otherwise).
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       # ── Secrets — set these in the Render dashboard (sync:false = not in git) ──
       - key: SUPABASE_URL
         sync: false
@@ -22,6 +24,12 @@ services:
         sync: false
       # CORS_ORIGINS: your deployed frontend origin, e.g. https://rani.vercel.app
       - key: CORS_ORIGINS
+        sync: false
+      # GEMINI_API_KEY: NLP fallback (nlp → Gemini on unknown intent) + voice parse.
+      - key: GEMINI_API_KEY
+        sync: false
+      # GROQ_API_KEY: voice speech-to-text (/api/voice).
+      - key: GROQ_API_KEY
         sync: false
       # JWT_SECRET: Render generates a strong random value (replaces the insecure
       # "change-me-in-prod" placeholder). Never expose or commit this.
