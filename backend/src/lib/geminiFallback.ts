@@ -57,20 +57,32 @@ export async function geminiParseCommand(raw: string): Promise<ParsedCommand> {
   }
 
   try {
-    const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser message: "${raw}"` }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0,
-        },
-      }),
+    const requestBody = JSON.stringify({
+      contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser message: "${raw}"` }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0,
+      },
     });
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status} ${await response.text()}`);
+    // The free Gemini tier intermittently returns 503 ("high demand") / 429.
+    // Retry a couple of times with backoff so one transient blip doesn't drop
+    // the user into an "unknown" — otherwise a good Taglish message silently fails.
+    let response: Response | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: requestBody,
+      });
+      if (response.ok) break;
+      const transient = response.status === 503 || response.status === 429 || response.status >= 500;
+      if (!transient || attempt === 2) break;
+      await new Promise((r) => setTimeout(r, 500 * (attempt + 1))); // 500ms, then 1s
+    }
+
+    if (!response || !response.ok) {
+      throw new Error(`Gemini API error: ${response?.status} ${response ? await response.text() : ""}`);
     }
 
     const data = (await response.json()) as {
