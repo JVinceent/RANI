@@ -298,11 +298,13 @@ export function ChatView({
       addMessage("user", text);
       setNotFoundName(null);   // ADD THIS
       setCandidates(null);     // ADD THIS
-      
+      const looksLikeFullCommand = /\d|\b(send|pay|transfer|give|padala|bayad)\b/i.test(text);
+      const toParse = looksLikeFullCommand ? text : `send to ${text}`;
+            
       try {
         // Always try full NLP parsing first — handles the case where the
         // user retypes a whole command instead of just a bare name.
-        const result = await parseCommand(text);
+        const result = await parseCommand(toParse);
 
         if (result.candidates && result.candidates.length >= 1) {
           addMessage("assistant", result.clarificationReason ?? `I found ${result.candidates.length} contacts — which one do you mean?`);
