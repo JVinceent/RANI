@@ -7,13 +7,14 @@ const FF = "'DM Sans', sans-serif";
 
 interface AuthViewProps {
   onConnect: () => void;
+  busy?: boolean;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    ROOT
 ═══════════════════════════════════════════════════════════════════ */
 
-export function AuthView({ onConnect }: AuthViewProps) {
+export function AuthView({ onConnect, busy = false }: AuthViewProps) {
   const [hoverF, setHoverF] = useState(false);
   const [hoverX, setHoverX] = useState(false);
   const isMobile = useIsMobile();
@@ -259,15 +260,17 @@ export function AuthView({ onConnect }: AuthViewProps) {
             {/* Primary — Freighter */}
             <button
               onClick={onConnect}
+              disabled={busy}
               onMouseEnter={() => setHoverF(true)}
               onMouseLeave={() => setHoverF(false)}
               style={{
                 width: "100%",
                 padding: "16px 0",
                 borderRadius: 14,
-                background: hoverF ? "#1D4ED8" : "#2563EB",
+                background: busy ? "#1E3A8A" : hoverF ? "#1D4ED8" : "#2563EB",
                 border: "none",
-                cursor: "pointer",
+                cursor: busy ? "wait" : "pointer",
+                opacity: busy ? 0.85 : 1,
                 color: "#fff",
                 fontSize: 15,
                 fontWeight: 600,
@@ -280,8 +283,17 @@ export function AuthView({ onConnect }: AuthViewProps) {
                 boxShadow: "0 6px 20px rgba(37,99,235,0.35)",
               }}
             >
-              <Wallet size={17} color="#fff" />
-              Connect Freighter Wallet
+              {busy ? (
+                <>
+                  <span style={{ width: 15, height: 15, border: "2px solid rgba(255,255,255,0.45)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block" }} className="animate-spin" />
+                  Connecting…
+                </>
+              ) : (
+                <>
+                  <Wallet size={17} color="#fff" />
+                  Connect Freighter Wallet
+                </>
+              )}
             </button>
 
             {/* OR separator */}

@@ -100,6 +100,26 @@ export function SEP24Modal({ onClose }: SEP24ModalProps) {
             </span>
           </div>
 
+          {/* Demo badge — this SEP-24 anchor flow is simulated, not a real cash-in */}
+          <span
+            title="Simulated anchor flow — no real funds move"
+            style={{
+              fontFamily: FF,
+              fontSize: 9.5,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              color: "#FBBF24",
+              background: "rgba(245,158,11,0.16)",
+              border: "1px solid rgba(245,158,11,0.35)",
+              padding: "3px 8px",
+              borderRadius: 999,
+              textTransform: "uppercase",
+              flexShrink: 0,
+            }}
+          >
+            Demo
+          </span>
+
           {/* Close */}
           <button
             onClick={onClose}

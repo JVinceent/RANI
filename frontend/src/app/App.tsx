@@ -22,6 +22,9 @@ export default function App() {
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const { connect, connecting } = useWallet();
+  // Covers the whole connect flow (Freighter + backend), so the button shows a
+  // loading state through Render's cold start instead of looking frozen.
+  const [busy, setBusy] = useState(false);
   // Holds a transcribed voice message until ChatView has consumed it.
   const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -34,31 +37,44 @@ export default function App() {
   }, [isDarkMode]);
 
   const handleConnect = async () => {
+    if (busy) return; // guard against double-taps
     setAuthError(null);
+    setBusy(true);
 
     try {
       const publicKey = await connect();
 
       let walletPublicKey = publicKey;
       if (!walletPublicKey) {
-        const fallbackId =
-          typeof crypto !== "undefined" && "randomUUID" in crypto
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-        walletPublicKey = `demo-wallet-${fallbackId}`;
+        // Real Freighter is required. Only fall back to a throwaway demo
+        // identity when explicitly enabled (VITE_ALLOW_DEMO_WALLET=true) for
+        // local UI work — never in the deployed demo, where a fake account
+        // that can't sign real transactions would be misleading.
+        if (import.meta.env.VITE_ALLOW_DEMO_WALLET === "true") {
+          const fallbackId =
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+          walletPublicKey = `demo-wallet-${fallbackId}`;
+        } else {
+          setAuthError("Freighter wallet not found. Install the Freighter extension (freighter.app), then try again.");
+          return;
+        }
       }
 
       const data = await connectFreighter(`${walletPublicKey.slice(0, 12).toLowerCase()}@rani.local`, walletPublicKey);
 
       if (data.name) {
         setUserName(data.name);
-        setUserEmail(data.email); 
+        setUserEmail(data.email);
         setScreen("main");
       } else {
         setScreen("onboarding");
       }
     } catch (e: any) {
       setAuthError(e.message ?? "Could not reach the backend.");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -66,10 +82,11 @@ export default function App() {
   if (screen === "auth") {
     return (
       <>
-        <AuthView onConnect={handleConnect} />
-        {connecting && (
-          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", color: "#fff", background: "#1D4ED8", padding: "8px 16px", borderRadius: 8, fontFamily: FF }}>
-            Connecting to Freighter…
+        <AuthView onConnect={handleConnect} busy={busy || connecting} />
+        {(busy || connecting) && (
+          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", color: "#fff", background: "#1D4ED8", padding: "8px 16px", borderRadius: 8, fontFamily: FF, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ width: 12, height: 12, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block" }} className="animate-spin" />
+            {connecting ? "Connecting to Freighter…" : "Signing you in…"}
           </div>
         )}
         {authError && (
