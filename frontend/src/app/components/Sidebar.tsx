@@ -9,6 +9,7 @@ import {
   Mic,
   Sun,
   Moon,
+  LogOut,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { NotificationsDropdown } from "./NotificationsDropdown";
@@ -28,6 +29,7 @@ interface SidebarProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
   userName?: string;
+  onLogout: () => void;
 }
 
 const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
@@ -37,7 +39,7 @@ const PRIMARY_NAV: { id: AppView; icon: React.ElementType; label: string }[] = [
   { id: "voice", icon: Mic, label: "Voice" },
 ];
 
-export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme, userName }: SidebarProps) {
+export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme, userName, onLogout }: SidebarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
   
@@ -306,6 +308,32 @@ export function Sidebar({ activeView, onNavigate, isDarkMode, toggleTheme, userN
               style={{ opacity: activeView === "settings" ? 1 : 0.5 }}
               strokeWidth={activeView === "settings" ? 2 : 1.5}
             />
+          </button>
+
+          {/* Log out */}
+          <button
+            onClick={onLogout}
+            title="Log out"
+            style={{
+              width: 52,
+              height: 40,
+              borderRadius: 10,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 150ms",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.10)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+            }}
+          >
+            <LogOut size={17} color="#EF4444" style={{ opacity: 0.75 }} strokeWidth={1.6} />
           </button>
 
           {/* ── Avatar  →  Settings > Profile ── */}

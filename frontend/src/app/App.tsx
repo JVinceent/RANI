@@ -8,7 +8,7 @@ import { HistoryView } from "./components/HistoryView";
 import { VoiceListeningView } from "./components/VoiceListeningView";
 import { FullSettingsView } from "./components/FullSettingsView";
 import { useWallet } from "../hooks/useWallet";
-import { connectFreighter, saveName } from "../lib/api";
+import { connectFreighter, saveName, logout } from "../lib/api";
 
 
 const FF = "'DM Sans', sans-serif";
@@ -21,7 +21,7 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const { connect, connecting } = useWallet();
+  const { connect, connecting, disconnect } = useWallet();
   // Covers the whole connect flow (Freighter + backend), so the button shows a
   // loading state through Render's cold start instead of looking frozen.
   const [busy, setBusy] = useState(false);
@@ -81,6 +81,16 @@ export default function App() {
   const handleConnect = () => runConnect();
   const handleDemo = () => runConnect({ demo: true });
 
+  const handleLogout = () => {
+    logout();            // clear the JWT
+    disconnect();        // drop the wallet connection
+    setUserName(null);
+    setUserEmail(null);
+    setAuthError(null);
+    setActiveView("chat");
+    setScreen("auth");   // back to the connect screen
+  };
+
   /* ── Auth frame ── */
   if (screen === "auth") {
     return (
@@ -134,12 +144,13 @@ export default function App() {
         overflow: "hidden",
       }}
     >
-      <Sidebar 
-        activeView={activeView} 
-        onNavigate={setActiveView} 
-        isDarkMode={isDarkMode} 
-        toggleTheme={() => setIsDarkMode(!isDarkMode)} 
+      <Sidebar
+        activeView={activeView}
+        onNavigate={setActiveView}
+        isDarkMode={isDarkMode}
+        toggleTheme={() => setIsDarkMode(!isDarkMode)}
         userName={userName ?? undefined}
+        onLogout={handleLogout}
       />
 
       <div
