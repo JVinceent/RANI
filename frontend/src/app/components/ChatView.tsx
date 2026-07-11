@@ -16,6 +16,17 @@ import { SwapModal } from "./SwapModal";
 import { getBalance, addContact, parseCommand, buildTransaction, submitTransaction, type Contact } from "../../lib/api";
 import { decodeQrImage } from "../../lib/decodeQrImage";
 import { useWallet } from "../../hooks/useWallet";
+import {
+  listConversations,
+  getConversation,
+  upsertConversation,
+  deleteConversation,
+  titleFrom,
+  newConversationId,
+  relativeLabel,
+  type Conversation,
+} from "../../lib/conversations";
+import { Plus, MessageSquare, Trash2, ChevronDown } from "lucide-react";
 
 const FF = "'DM Sans', sans-serif";
 
@@ -104,6 +115,12 @@ export function ChatView({
   const [addingContactName, setAddingContactName] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
+  // ── Saved conversations (localStorage) ────────────────────────────
+  const [conversationId, setConversationId] = useState<string>(() => newConversationId());
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [showConvMenu, setShowConvMenu] = useState(false);
+  const restored = useRef(false);
+
   const addMessage = (role: "user" | "assistant", text: string) => {
     setMessages((prev) => [...prev, { id: crypto.randomUUID(), role, text }]);
   };
@@ -120,6 +137,73 @@ export function ChatView({
     setAddingContactName(null);
     setMessages([]);
     go("landing");
+  };
+
+  // Clear only the transient payment-flow state, keeping the transcript.
+  const clearFlowKeepMessages = () => {
+    setAwaiting(null);
+    setCandidates(null);
+    setResolvedContact(null);
+    setAmount(null);
+    setMemo(null);
+    setNotFoundName(null);
+    setAddingContactName(null);
+    setConfirmError(null);
+    setBuiltTx(null);
+    setTxHash(null);
+  };
+
+  // On mount: reopen the most recent saved conversation (if any).
+  useEffect(() => {
+    const list = listConversations();
+    setConversations(list);
+    if (list.length > 0 && list[0].messages.length > 0) {
+      setConversationId(list[0].id);
+      setMessages(list[0].messages);
+      setState("disambiguation"); // reveal the message thread
+    }
+    restored.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist the current conversation whenever its messages change.
+  useEffect(() => {
+    if (!restored.current || messages.length === 0) return;
+    upsertConversation({
+      id: conversationId,
+      title: titleFrom(messages),
+      messages,
+      updatedAt: Date.now(),
+    });
+    setConversations(listConversations());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
+  const newConversation = () => {
+    setConversationId(newConversationId());
+    resetFlow();
+    setShowConvMenu(false);
+    setConversations(listConversations());
+  };
+
+  const openConversation = (id: string) => {
+    const conv = getConversation(id);
+    if (!conv) return;
+    clearFlowKeepMessages();
+    setConversationId(id);
+    setMessages(conv.messages);
+    setState(conv.messages.length > 0 ? "disambiguation" : "landing");
+    setShowConvMenu(false);
+  };
+
+  const removeConversation = (id: string) => {
+    deleteConversation(id);
+    const list = listConversations();
+    setConversations(list);
+    if (id === conversationId) {
+      if (list.length > 0) openConversation(list[0].id);
+      else newConversation();
+    }
   };
 
   const prepareConfirm = async () => {
@@ -520,6 +604,151 @@ if (awaiting === "amount") {
       }}
     >
       <Header />
+
+      {/* ── Conversation switcher ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+          padding: "8px 20px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <button
+          onClick={() => setShowConvMenu((v) => !v)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            maxWidth: "70%",
+            padding: "6px 10px",
+            borderRadius: 9,
+            background: showConvMenu ? "var(--muted)" : "transparent",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            color: "var(--foreground)",
+            fontSize: 13,
+            fontFamily: FF,
+            fontWeight: 500,
+          }}
+        >
+          <MessageSquare size={13} color="var(--muted-foreground)" />
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {conversations.find((c) => c.id === conversationId)?.title ??
+              (messages.length ? titleFrom(messages) : "New conversation")}
+          </span>
+          <ChevronDown size={13} color="var(--muted-foreground)" style={{ flexShrink: 0 }} />
+        </button>
+
+        <button
+          onClick={newConversation}
+          title="Start a new conversation"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            borderRadius: 9,
+            background: "rgba(37,99,235,0.10)",
+            border: "1px solid rgba(37,99,235,0.25)",
+            cursor: "pointer",
+            color: "#60A5FA",
+            fontSize: 12.5,
+            fontFamily: FF,
+            fontWeight: 600,
+            flexShrink: 0,
+          }}
+        >
+          <Plus size={13} /> New
+        </button>
+
+        {showConvMenu && (
+          <>
+            <div style={{ position: "fixed", inset: 0, zIndex: 29 }} onClick={() => setShowConvMenu(false)} />
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 4px)",
+                left: 20,
+                width: 300,
+                maxHeight: 340,
+                overflowY: "auto",
+                background: "var(--background)",
+                border: "1px solid var(--border)",
+                borderRadius: 12,
+                boxShadow: "0 20px 48px rgba(0,0,0,0.4)",
+                zIndex: 30,
+                padding: 6,
+              }}
+            >
+              {conversations.length === 0 && (
+                <div style={{ padding: "14px 12px", color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: FF, textAlign: "center" }}>
+                  No saved conversations yet.
+                </div>
+              )}
+              {conversations.map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => openConversation(c.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "9px 10px",
+                    borderRadius: 9,
+                    cursor: "pointer",
+                    background: c.id === conversationId ? "rgba(37,99,235,0.10)" : "transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (c.id !== conversationId) (e.currentTarget as HTMLDivElement).style.background = "var(--muted)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (c.id !== conversationId) (e.currentTarget as HTMLDivElement).style.background = "transparent";
+                  }}
+                >
+                  <MessageSquare size={13} color="var(--muted-foreground)" style={{ flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: "var(--foreground)", fontSize: 13, fontFamily: FF, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {c.title}
+                    </div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: FF, marginTop: 1 }}>
+                      {relativeLabel(c.updatedAt)} · {c.messages.length} message{c.messages.length === 1 ? "" : "s"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeConversation(c.id);
+                    }}
+                    title="Delete conversation"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 26,
+                      height: 26,
+                      borderRadius: 7,
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.12)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "transparent")}
+                  >
+                    <Trash2 size={13} color="#EF4444" style={{ opacity: 0.7 }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
         <AnimatePresence mode="wait">
