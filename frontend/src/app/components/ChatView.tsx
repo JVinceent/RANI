@@ -65,6 +65,7 @@ export function ChatView({
   onMicClick,
   voiceTranscript,
   onVoiceTranscriptHandled,
+  walletAddress,
 }: {
   userName: string;
   /** Opens the voice-listening view. */
@@ -73,8 +74,13 @@ export function ChatView({
   voiceTranscript?: string | null;
   /** Called after the transcript above has been consumed, so the parent can clear it. */
   onVoiceTranscriptHandled?: () => void;
+  /** The connected wallet's public key, owned by the parent (App). */
+  walletAddress?: string | null;
 }) {
-  const { publicKey, sign, connect, connecting: connectingWallet } = useWallet();
+  // useWallet is per-component state; the connection lives in App's instance, so
+  // this hook's publicKey is null here. Use the address the parent passes down.
+  const { publicKey: hookPublicKey, sign, connect, connecting: connectingWallet } = useWallet();
+  const publicKey = walletAddress ?? hookPublicKey;
   const [state, setState] = useState<ChatState>("landing");
   const [feeXLM, setFeeXLM] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -143,8 +149,16 @@ export function ChatView({
   };
 
   const handleConfirm = async () => {
-    if (!builtTx || !publicKey) {
-      setConfirmError("Payment isn't ready yet.");
+    if (publicKey?.startsWith("demo-wallet")) {
+      setConfirmError("Demo Mode can't sign real transactions. Log out and connect a Freighter wallet to send.");
+      return;
+    }
+    if (!publicKey) {
+      setConfirmError("No wallet connected. Connect Freighter and try again.");
+      return;
+    }
+    if (!builtTx) {
+      setConfirmError("Couldn't prepare this payment — make sure your wallet is funded on testnet, then try again.");
       return;
     }
     setConfirming(true);

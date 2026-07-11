@@ -21,6 +21,9 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  // The connected wallet address, owned here and passed to views that need to
+  // sign (useWallet is per-component, so children can't read App's connection).
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const { connect, connecting, disconnect } = useWallet();
   // Covers the whole connect flow (Freighter + backend), so the button shows a
   // loading state through Render's cold start instead of looking frozen.
@@ -63,6 +66,7 @@ export default function App() {
       }
 
       const data = await connectFreighter(`${walletPublicKey.slice(0, 12).toLowerCase()}@rani.local`, walletPublicKey);
+      setWalletAddress(walletPublicKey);
 
       if (data.name) {
         setUserName(data.name);
@@ -84,6 +88,7 @@ export default function App() {
   const handleLogout = () => {
     logout();            // clear the JWT
     disconnect();        // drop the wallet connection
+    setWalletAddress(null);
     setUserName(null);
     setUserEmail(null);
     setAuthError(null);
@@ -171,6 +176,7 @@ export default function App() {
             onMicClick={() => setActiveView("voice")}
             voiceTranscript={pendingVoiceText}
             onVoiceTranscriptHandled={() => setPendingVoiceText(null)}
+            walletAddress={walletAddress}
           />
         </div>
         {activeView === "contacts" && <ContactsView />}
