@@ -403,6 +403,30 @@ if (awaiting === "amount") {
         return;
       }
 
+      // Add a new contact — reuse the address-capture flow (submitNewContactAddress
+      // runs on the next message once addingContactName is set).
+      if (result.intent === "add_contact") {
+        if (result.recipientName) {
+          addMessage("assistant", `Sure — what's ${result.recipientName}'s Stellar address? (starts with G…)`);
+          setAddingContactName(result.recipientName);
+        } else {
+          addMessage("assistant", "Sure — who would you like to add? Tell me their name, then I'll ask for their Stellar address.");
+          setAwaiting("recipient");
+        }
+        return;
+      }
+
+      // Not yet supported — answer helpfully instead of dead-ending on the
+      // generic "couldn't understand" message.
+      if (result.intent === "pay_bill") {
+        addMessage("assistant", "Bill payments (Meralco, water, etc.) are on the way 🚧 — for now I can send money to your saved contacts. Try \"Send ₱500 to Maria for the bill\".");
+        return;
+      }
+      if (result.intent === "request_payment") {
+        addMessage("assistant", "Payment requests are coming soon 🚧 — for now I can send payments. Try \"Send ₱200 to Juan\".");
+        return;
+      }
+
       if (result.needsClarification) {
         addMessage("assistant", result.clarificationReason ?? "Could you clarify that?");
 
